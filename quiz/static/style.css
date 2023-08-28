@@ -1,0 +1,71 @@
+/* Import Montserrat font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+@font-face {
+    font-family: 'Montserrat';
+    src: url('path/to/montserrat.woff2') format('woff2'),
+         url('path/to/montserrat.woff') format('woff');
+    /* Add more font formats if necessary */
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Apply Montserrat font to different elements */
+body {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400; /* Regular */
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; /* Regular */
+    /* You can also adjust other properties like font-weight, etc. */
+}
+.custom-font{
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400; /* Regular */
+
+}
+.navbar {
+    width:100% !important;
+    padding-left: 0; /* Remove left padding */
+    padding-right: 0; /* Remove right padding */
+    margin-left: 0; /* Remove left margin */
+    margin-right: 0; /* Remove right margin */
+    border: none; /* Remove border */
+}
+
+/* Adjust navbar links alignment */
+
+
+/* Adjust navbar brand alignment */
+.navbar-brand {
+    margin-left: 0; /* Reset margin */
+}
+/* Apply Montserrat font to different elements */
+body, .navbar, .navbar-nav, .navbar-brand {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; /* Regular */
+    color: white; /* Set text color to white */ 
+}
+
+/* Additional styling for specific elements */
+.bg-grey {
+    background-color: #3a3838; /* Set background color for grey theme */
+}
+/* Additional styling for specific elements */
+
+
+.gradient-custom {
+    /* fallback for old browsers */
+    background: #6a11cb;
+    overflow: auto;
+    height: 100% !important;
+    
+    /* Chrome 10-25, Safari 5.1-6 */
+    /* background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)); */
+    
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    /* background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)) */
+    }
+
+/* Add this to your existing CSS stylesheet */

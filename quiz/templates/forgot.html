@@ -1,0 +1,40 @@
+<!-- Section: Design Block -->
+{% extends 'base.html' %}
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+<section class="text-center">
+    <!-- Background image -->
+    <div class="p-5 bg-image" style="
+          background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+          height: 300px;
+          "></div>
+    <!-- Background image -->
+    <div class="card mx-4 mx-md-5 shadow-5-strong" style="
+          margin-top: -100px;
+          background: hsla(0, 0%, 100%, 0.8);
+          backdrop-filter: blur(30px);
+          ">
+      <div class="card-body py-5 px-md-5">
+        <div class="row d-flex justify-content-center">
+          <div class="col-lg-5">
+            
+            <h2 class="fw-bold mb-5">Enter Your Email</h2>
+            <form method="post" action="{% url 'verify_otp' %}">
+              {% csrf_token %}
+              <!-- Email input -->
+              <div class="form-outline mb-4">
+                  <input type="email" id="form3Example3" class="form-control" name="email" required/>
+                  <p><label class="form-label" for="form3Example3" autocomplete>Email address</label><p>
+              </div>
+              <!-- Submit button -->
+              <p><button type="submit" class="btn btn-primary btn-block mb-400" ></p>
+                  Send OTP
+              </button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Section: Design Block -->
+  {% endblock %}

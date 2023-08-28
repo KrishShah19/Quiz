@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<html>
+    <head>
+        <title>Python Quiz</title>
+        <style>
+            body {
+                background-color: #343a40 !important; /* Set the dark background color */
+            }
+            .custom-btn.btn-outline-secondary {
+                border-color: white !important;
+                color: white !important;
+            }
+            .custom-btn.btn-outline-secondary:hover {
+                border-color: white !important;
+                color: white !important;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="text-white">Click on Start Quiz when you are ready!</p>
+        <div class="btn-group">
+            <div class="btn-group">
+                <p><a href="{% url 'python_quiz' %}" class="btn btn-sm custom-btn btn-outline-secondary">Start</a></p>
+            </div>
+        </div>          
+    </body>
+</html>
+{% endblock %}
