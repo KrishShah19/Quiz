@@ -129,12 +129,17 @@ class LoginView(View):
         else:
             return render(request,'login.html', {'error': 'Invalid credentials'})
 
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
 class IndexView(View):
+    @method_decorator(login_required)
     def get(self, request):
         if request.user.is_authenticated:
             return render(request, 'index.html', {'username': request.user.username})
         else:
-            return redirect('login')
+            return redirect('/')
         
 class ForgotView(PasswordResetView):
     def get(self, request):
@@ -215,9 +220,25 @@ class RegisterView(View):
 #             messages.error(request, 'Failed to send OTP. Please try again.')
 #             return render(request, self.template_name)
 
+from models import *
 class PythonQuiz(View):
     def get(self, request):
         return render(request, 'python_quiz.html')
+    
+    # def get_quiz(request):
+    #     # try:
+    #     #     question_objs=list(Question.objects.all())
+    #     #     data=[]
+    #     #     random.shuffle(question_objs)
+    #     #     for question_obj in question_objs:
+    #     #         data.append({
+    #     #             "category":question_obj.category.category_name,
+    #     #             "question":question_obj.question,
+    #     #             "marks":question_obj.marks,
+    #     #             "answer":question_obj.get_answers()
+    #     #         })
+
+            
 
 class DjangoQuiz(View):
     def get(self, request):
@@ -226,3 +247,10 @@ class DjangoQuiz(View):
 class JavaQuiz(View):
     def get(self, request):
         return render(request, 'java_quiz.html')
+
+from django.contrib.auth import logout
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('/')

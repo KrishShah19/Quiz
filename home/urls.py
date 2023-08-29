@@ -17,16 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from quiz.views import *
+from django.contrib.auth.decorators import login_required
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', LoginView.as_view(), name='login'),
-    path('index/', IndexView.as_view(), name='index'),
+    path('index/', login_required(IndexView.as_view()), name='index'),
     path('register/', RegisterView.as_view(), name='register'),
     path('forgot/', ForgotView.as_view(), name='forgot'),
     path('api/verify_otp/', VerifyOTP.as_view(), name='verify_otpapi'),
     path('verify_otp/', VerifyOTPView.as_view(), name='verify_otp'),
-    # path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('api/register/',RegisterAPI.as_view(), name='registerapi'),
     path('python_quiz/', PythonQuiz.as_view(), name='python_quiz'),
     path('django_quiz/', DjangoQuiz.as_view(), name='django_quiz'),

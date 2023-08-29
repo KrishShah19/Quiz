@@ -13,5 +13,15 @@
         <!-- Content goes here -->
         {% endblock %}
     </div>
+    <script>
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            window.location.href = '/'; // Redirect to login page
+        }
+        window.addEventListener('popstate', function (event) {
+            if (document.referrer === "http://127.0.0.1:8000/") {
+                history.pushState(null, null, "/index/");
+            }
+        });
+    </script>
 </body>
 </html>

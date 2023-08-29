@@ -39,8 +39,13 @@ class Category(BaseModel):
         return self.category_name
 
 class Question(BaseModel):
+    # QUESTION_TYPES = [
+    #     ('MCQ', 'Multiple Choice Question'),
+    #     ('FIB', 'Fill in the Blanks'),
+    # ]
     category=models.ForeignKey(Category,related_name='category', on_delete=models.CASCADE)
     question=models.CharField(max_length=100)
+    # question_type = models.CharField(max_length=3, choices=QUESTION_TYPES)
     marks=models.IntegerField(default=1)
 
     def __str__(self) -> str:
@@ -55,3 +60,4 @@ class Answer(BaseModel):
 
     def __str__(self) -> str:
         return self.answer
+    

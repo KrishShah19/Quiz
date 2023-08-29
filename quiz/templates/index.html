@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <!DOCTYPE html>
 <html>
     <head>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
         <title>Logged In User</title>
+        <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+
         <style>
           .translucent-container {
             background-color: rgba(58, 56, 56, 0.8) !important; /* Adjust the alpha value to control transparency */
@@ -20,7 +25,7 @@
     <body class="bg-dark">
         <nav class="navbar navbar-expand-lg navbar-dark bg-grey container-fluid">
             <div class="container-fluid">
-              <a class="navbar-brand" href="#">Quizzy</a>
+              <a class="navbar-brand" href="/index">Quizzy</a>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>

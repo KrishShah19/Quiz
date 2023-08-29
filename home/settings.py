@@ -133,3 +133,9 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'krishshah1904@gmail.com'
 EMAIL_HOST_PASSWORD = 'onuvovnigdodciqr'
+
+if DEBUG:
+    CACHE_MIDDLEWARE_SECONDS = 0
+
+
+LOGIN_URL = '/'
