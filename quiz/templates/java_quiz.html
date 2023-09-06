@@ -1,1 +1,119 @@
-hello
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Java Quiz</title>
+    <style>
+        body {
+            background-color: #343a40 !important;
+            color: white;
+        }
+    
+        /* Add any additional CSS styles as needed */
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #343a40;
+            border-radius: 10px;
+            background-color: #1e1e1e;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: center !important;
+        }
+        .timer-container {
+            font-size: 24px;
+            color: white;
+            display: inline-block;
+            background-color: #343a40;
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: 1px solid !important;
+            margin-left: auto; /* Shift the timer container to the right */
+        }
+    </style>
+    <!-- Include your CSS and JavaScript files here -->
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="quiz-container">
+            <div class="header">
+                <h1 class="text-center mb-4 mt-0">Java Quiz 
+                    <div class="timer-container text-center mt-3">
+                        <span id="minutes">00</span>:<span id="seconds">00</span>
+                    </div>
+                </h1>
+            </div>
+        <form method="post" id="quiz-form">
+            {% csrf_token %}
+            {% for question in questions %}
+                <h2>{{ question.question}}</h2>
+                <ul>
+                    {% for answer in answers %}
+                        {% if answer.question == question %}
+                            <li>
+                                <label>
+                                    <input type="radio" name="question_{{ question.uuid }}" class="answer-radio" value="{{ answer.uuid }}">
+                                    {{ answer.answer }}
+                                </label>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Submit Quiz</button>
+        </form>
+    </div>
+    
+    <!-- Include your JavaScript for the timer and form validation here -->
+    <script>
+        // Timer variables
+        let minutes = 5; // Set the quiz time in minutes
+        let seconds = 0;
+
+        // Add event listeners to answer radios for form validation
+        const answerRadios = document.querySelectorAll('.answer-radio');
+        answerRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                enableSubmitButton();
+            });
+        });
+
+        // Enable the submit button when all questions are answered
+        function enableSubmitButton() {
+            const allAnswered = [...answerRadios].every(radio => radio.checked);
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = !allAnswered;
+        }
+
+        // Update the timer and handle timer expiration
+        function updateTimer() {
+            if (seconds === 0) {
+                if (minutes === 0) {
+                    // Redirect to the home page and display a message
+                    window.location.href = "/index";
+                    clearInterval(timerInterval); // Stop the timer
+                    alert('Time is up. Quiz is completed.');
+                } else {
+                    minutes--;
+                    seconds = 59    ;
+                }
+            } else {
+                seconds--;
+            }
+
+            // Update the timer 
+            document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+            document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+        }
+
+        // Start the timer countdown
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Initial timer text setup
+        updateTimer();
+    </script>
+</body>
+</html>
+{% endblock%}

@@ -1,3 +1,4 @@
+import random
 from django.db import models
 
 # Create your models here.
@@ -50,7 +51,12 @@ class Question(BaseModel):
 
     def __str__(self) -> str:
         return self.question
-
+    
+    def get_answers(self):
+        answer_objs=list(Answer.objects.filter(question=self))
+        random.shuffle(answer_objs)
+        data=[]
+        
 class Answer(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question,related_name='question_answer', on_delete=models.CASCADE)
@@ -61,3 +67,12 @@ class Answer(BaseModel):
     def __str__(self) -> str:
         return self.answer
     
+# class UserResponse(BaseModel):
+#     user
+#     question_id
+#     answer 
+#     is_correct
+
+
+#     def __str__(self) -> str:
+#         return f"{self.user.username} - {self.question.question}"

@@ -1,29 +1,162 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<html>
-    <head>
-        <title>Python Quiz</title>
-        <style>
-            body {
-                background-color: #343a40 !important; /* Set the dark background color */
+
+<style>
+    body {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    /* Add any additional CSS styles as needed */
+    .quiz-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #343a40;
+        border-radius: 10px;
+        background-color: #1e1e1e;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        position: center !important;
+    }
+
+    .question {
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    .options {
+        margin-top: 10px;
+    }
+
+    .options label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    /* Add this custom style in your CSS file */
+    .custom-submit-button {
+        background-color: black;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border: 1px solid white; /* Set the desired border color */
+        border-radius: 15px;
+        /* Add any other styles you want */
+        margin-right: auto;
+        font-family: 'Montserrat', sans-serif; /* Replace 'Your-Font-Family' with the actual font family you want to use */
+        font-size: 15px;
+    }
+
+    /* Add this CSS rule to style the question numbers */
+    h2::before {
+        content: "Q." attr(data-number) " "; /* Add a number and a period before each question */
+        font-weight: bold;
+    }
+
+    .header {
+        display: flex; /* Use flexbox for header layout */
+        align-items: center; /* Vertically center the content */
+        justify-content: space-between; /* Pushes items to the edges */
+        margin-bottom: 20px; /* Add space between header and questions */
+
+    }
+
+    .timer-container {
+        font-size: 24px;
+        color: white;
+        display: inline-block;
+        background-color: #343a40;
+        padding: 8px 10px;
+        border-radius: 5px;
+        border: 1px solid !important;
+        margin-left: auto; /* Shift the timer container to the right */
+    }
+
+    /* Add this CSS rule to style the cursor on hover */
+    .custom-submit-button:hover {
+        cursor: pointer;
+    }
+
+</style>
+
+<div class="container mt-4">
+    <div class="quiz-container">
+        <div class="header">
+            <h1 class="text-center mb-4 mt-0">Python Quiz 
+                <div class="timer-container text-center mt-3">
+                    <span id="minutes">00</span>:<span id="seconds">00</span>
+                </div>
+            </h1>
+        </div>
+        
+        <form method="post" onsubmit="return validateForm()">
+            {% csrf_token %}
+            {% for question in questions %}
+                <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
+                <ul class="options">
+                    {% for answer in answers %}
+                        {% if answer.question == question %}
+                            <li>
+                                <label>
+                                    <input type="radio" name="question_{{ question.uuid }}" class="answer-radio" value="{{ answer.uuid }}">
+                                    {{ answer.answer }}
+                                </label>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+            <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const submitBtn = document.querySelector('.btn-submit');
+
+    let minutes = 5; // Set the quiz time in minutes
+    let seconds = 0;
+
+    function updateTimer() {
+        if (seconds === 0) {
+            if (minutes === 0) {
+                clearInterval(timerInterval); // Stop the timer
+                alert("Time is up! Quiz is completed.");
+                // Redirect to the home page when the timer ends
+                window.location.href = "/index";
+            } else {
+                minutes--;
+                seconds = 59;
             }
-            .custom-btn.btn-outline-secondary {
-                border-color: white !important;
-                color: white !important;
+        } else {
+            seconds--;
+        }
+
+        document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+        document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+    }
+
+    // Start the timer countdown
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    function validateForm() {
+        const answerRadios = document.querySelectorAll('.answer-radio');
+        const answeredQuestions = new Set();
+
+        answerRadios.forEach(radio => {
+            if (radio.checked) {
+                // Extract the question UUID from the radio button's name attribute
+                const questionUuid = radio.name.split('_')[1];
+                answeredQuestions.add(questionUuid);
             }
-            .custom-btn.btn-outline-secondary:hover {
-                border-color: white !important;
-                color: white !important;
-            }
-        </style>
-    </head>
-    <body>
-        <p class="text-white">Click on Start Quiz when you are ready!</p>
-        <div class="btn-group">
-            <div class="btn-group">
-                <p><a href="{% url 'python_quiz' %}" class="btn btn-sm custom-btn btn-outline-secondary">Start</a></p>
-            </div>
-        </div>          
-    </body>
-</html>
+        });
+
+        if (answeredQuestions.size !== {{ total_questions }}) {
+            alert("Quiz not completed. Please answer all questions.");
+            return false;
+        }
+        return true;
+    }
+</script>
 {% endblock %}

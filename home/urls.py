@@ -32,6 +32,5 @@ urlpatterns = [
     path('api/register/',RegisterAPI.as_view(), name='registerapi'),
     path('python_quiz/', PythonQuiz.as_view(), name='python_quiz'),
     path('django_quiz/', DjangoQuiz.as_view(), name='django_quiz'),
-    path('java_quiz/', JavaQuiz.as_view(), name='java_quiz'),
-
+    path('java_quiz/', JavaQuiz.as_view(), name='java_quiz')
 ]

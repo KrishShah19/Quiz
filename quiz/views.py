@@ -1,3 +1,4 @@
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django import views
 from django.views import View
@@ -46,7 +47,6 @@ class RegisterAPI(APIView):
                'data': e
             })
 
-    
 
 class VerifyOTP(APIView):
     def post(self, request):
@@ -89,13 +89,19 @@ class VerifyOTP(APIView):
 User = get_user_model()
 
 class LoginAPI(APIView):
+    def get(self, request):
+        return render(request, 'login.html')
     def post(self, request):
         try:
+            # user_username = request.user.username
+            # request.session['_auth_user_username'] = user_username
+
             data = request.data
             username = data.get('username')
             password = data.get('password')
 
             user = authenticate(username=username, password=password)
+            # logger.debug('Debugging message to trace the flow of execution')
 
             if user is not None:
                 login(request, user)  # Log the user in
@@ -112,7 +118,6 @@ class LoginAPI(APIView):
                 })
         except Exception as e:
             print(e)
-
 
 class LoginView(View):
     def get(self, request):
@@ -141,25 +146,29 @@ class IndexView(View):
         else:
             return redirect('/')
         
+
 class ForgotView(PasswordResetView):
     def get(self, request):
         return render(request, 'forgot.html')
     
     # this view should send otp to the entered email
     def post(self, request):
+        print("POST CALLED")
         data = request.POST
         email = data.get('email')
         if send_otp(email):
             print("OTP SENT")
-            messages.success = 'OTP has been sent to your email.'
+            messages.success(request, 'OTP has been sent to your email.')
             return render(request, self.template_name, {'success_message': messages.success})
 
             # return redirect('verify_otp')  # Redirect to OTP verification page
         else:
-            messages.error = 'Failed to send OTP. Please try again later.'
+            messages.error(request, 'Failed to send OTP. Please try again later.')
             return render(request, 'forgot.html', {'error_message': messages.error})
         
-class VerifyOTPView(View):
+# from django.views.decorators.csrf import csrf_protect
+# @csrf_protect
+class VerifyOTPView(PasswordResetView):
     template_name = 'registration/verify_otp.html'
 
     def get(self, request):
@@ -219,38 +228,122 @@ class RegisterView(View):
 #         else:
 #             messages.error(request, 'Failed to send OTP. Please try again.')
 #             return render(request, self.template_name)
+from .models import *
+from django.contrib.sessions.models import Session
+from uuid import UUID
 
-from models import *
 class PythonQuiz(View):
+    @method_decorator(login_required)
     def get(self, request):
-        return render(request, 'python_quiz.html')
+        python_category = Category.objects.get(category_name='Python')
+        # questions = Question.objects.filter(category=python_category)
+        # answers = Answer.objects.filter(question__in=questions)
+
+        questions = list(Question.objects.filter(category=python_category))
+        answers = list(Answer.objects.all())    
+        
+
+        random.shuffle(questions)
+        random.shuffle(answers)
+         # Create a session key for this user's quiz progress
+        session_key = f'quiz_progress_{request.user.id}'
+        # Convert UUIDs to strings before storing them in the session
+        questions_ids = [str(question.uuid) for question in questions]
+        answers_ids = [str(answer.uuid) for answer in answers]
+        request.session[session_key] = {
+            'questions': questions_ids,
+            'answers': answers_ids,
+            'total_questions': len(questions),
+        }
+
+        print("Session Keys:", request.session.keys())
+        print("User ID from Session:", request.session.get(f'quiz_progress_{request.user.id}'))
+        context = {
+            'questions': questions,
+            'answers': answers,
+            'total_questions': len(questions),
+        }
+        return render(request, 'python_quiz.html', context)
+    
+    def post(self, request):
+        # Get the session key for this user's quiz progress
+        session_key = f'quiz_progress_{request.user.id}'
+        quiz_progress = request.session.get(session_key)
+
+        if not quiz_progress:
+            # Session has expired or the user is trying to submit without starting the quiz
+            return HttpResponseRedirect('/index/')  # Redirect to some appropriate page
+        
+        # Convert the stored UUID strings back to UUID objects
+        questions_ids = [UUID(question_id) for question_id in quiz_progress['questions']]
+        answers_ids = [UUID(answer_id) for answer_id in quiz_progress['answers']]
+        
+        # You can access the quiz progress data as quiz_progress['questions'] and quiz_progress['answers']
+        
+        # Handle the submitted answers here
+        
+        # Clear the quiz progress from the session
+        del request.session[session_key]
+
+        return HttpResponseRedirect('/index/')
+
+
+# class PythonQuiz(View):
+#     def get(self, request):
+#         return render(request, 'python_quiz.html')
     
     # def get_quiz(request):
-    #     # try:
-    #     #     question_objs=list(Question.objects.all())
-    #     #     data=[]
-    #     #     random.shuffle(question_objs)
-    #     #     for question_obj in question_objs:
-    #     #         data.append({
-    #     #             "category":question_obj.category.category_name,
-    #     #             "question":question_obj.question,
-    #     #             "marks":question_obj.marks,
-    #     #             "answer":question_obj.get_answers()
-    #     #         })
-
+    #     try:
+    #         question_objs=list(Question.objects.all())
+    #         data=[]
+    #         random.shuffle(question_objs)
+    #         for question_obj in question_objs:
+    #             data.append({
+    #                 "category":question_obj.category.category_name,
+    #                 "question":question_obj.question,
+    #                 "marks":question_obj.marks,
+    #                 "answer":question_obj.get_answers()
+    #             })
+    #         payload={'status':True, 'data':data}
+    #         return JsonResponse(payload)
+    #     except Exception as e:
+    #         print(e)
+    #     return HttpResponse("Something went wrong")
             
 
 class DjangoQuiz(View):
     def get(self, request):
         return render(request, 'django_quiz.html')
 
+from .models import Category, Question, Answer  # Import your models here
 class JavaQuiz(View):
     def get(self, request):
-        return render(request, 'java_quiz.html')
+        java_category = Category.objects.get(category_name='JS')
+        # questions = Question.objects.filter(category=java_category)
+        # answers = Answer.objects.filter(question__in=questions)
+        questions = list(Question.objects.filter(category=java_category))
+        answers = list(Answer.objects.all())    
+
+        random.shuffle(questions)
+        random.shuffle(answers)
+        context = {
+            'questions': questions,
+            'answers': answers,
+            'total_questions': len(questions),
+        }
+        return render(request, 'java_quiz.html', context)
 
 from django.contrib.auth import logout
-
 class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect('/')
+    
+# class UserAnswer(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+#     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+#     is_correct = models.BooleanField(default=False)
+
+#     def __str__(self):
+#         return f"{self.user.username} - {self.question.question}"
