@@ -146,28 +146,23 @@ class IndexView(View):
         else:
             return redirect('/')
         
+from django.urls import reverse  # Import reverse
 
 class ForgotView(PasswordResetView):
     def get(self, request):
         return render(request, 'forgot.html')
     
-    # this view should send otp to the entered email
     def post(self, request):
-        print("POST CALLED")
         data = request.POST
         email = data.get('email')
         if send_otp(email):
-            print("OTP SENT")
             messages.success(request, 'OTP has been sent to your email.')
-            return render(request, self.template_name, {'success_message': messages.success})
-
-            # return redirect('verify_otp')  # Redirect to OTP verification page
+            verify_otp_url = reverse('verify_otp', args=[email])
+            return HttpResponseRedirect(verify_otp_url)
         else:
             messages.error(request, 'Failed to send OTP. Please try again later.')
             return render(request, 'forgot.html', {'error_message': messages.error})
-        
-# from django.views.decorators.csrf import csrf_protect
-# @csrf_protect
+
 class VerifyOTPView(PasswordResetView):
     template_name = 'registration/verify_otp.html'
 
@@ -178,7 +173,6 @@ class VerifyOTPView(PasswordResetView):
         data = request.POST
         email = data.get('email')
         otp = data.get('otp')
-        print()
 
         user = User.objects.filter(email=email, otp=otp).first()
         if user:
@@ -188,7 +182,51 @@ class VerifyOTPView(PasswordResetView):
             return redirect('index')
         else:
             messages.error(request, 'Incorrect OTP. Please try again.')
-            return render(request, self.template_name)  
+            return render(request, self.template_name)
+
+# class ForgotView(PasswordResetView):
+#     def get(self, request):
+#         return render(request, 'forgot.html')
+    
+#     # this view should send otp to the entered email
+#     def post(self, request):
+#         print("POST CALLED")
+#         data = request.POST
+#         email = data.get('email')
+#         if send_otp(email):
+#             print("OTP SENT")
+#             messages.success(request, 'OTP has been sent to your email.')
+#             verify_otp_url = reverse('verify_otp', args=[email])
+#             return HttpResponseRedirect(verify_otp_url)
+#             # return redirect(verify_otp_url)
+#             # return redirect('verify_otp')  # Redirect to OTP verification page
+#         else:
+#             messages.error(request, 'Failed to send OTP. Please try again later.')
+#             return render(request, 'forgot.html', {'error_message': messages.error})
+        
+# # from django.views.decorators.csrf import csrf_protect
+# # @csrf_protect
+# class VerifyOTPView(PasswordResetView):
+#     template_name = 'registration/verify_otp.html'
+
+#     def get(self, request):
+#         return render(request, self.template_name)
+
+#     def post(self, request):
+#         data = request.POST
+#         email = data.get('email')
+#         otp = data.get('otp')
+#         print()
+
+#         user = User.objects.filter(email=email, otp=otp).first()
+#         if user:
+#             user.is_verified = True
+#             user.save()
+#             messages.success(request, 'OTP verified successfully!')
+#             return redirect('index')
+#         else:
+#             messages.error(request, 'Incorrect OTP. Please try again.')
+#             return render(request, self.template_name)  
         
 from django.shortcuts import render
 from django.views import View

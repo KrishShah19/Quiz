@@ -3,7 +3,7 @@ import random
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from .models import User
-
+import traceback
 def send_otp(email):
     subject = 'Your Account Verification Email'
     otp = random.randint(1000,9999)
@@ -25,6 +25,8 @@ def send_otp(email):
             # Handle the case where the user doesn't exist
             return False
     except Exception as e:
+        traceback.print_exc()  # Print the exception traceback for debugging
         print(f"An error occurred while sending the OTP email: {e}")
-        return False
+        return str(e)  # Return the exception as a string for debugging
+
 

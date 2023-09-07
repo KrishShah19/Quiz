@@ -27,6 +27,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('forgot/', ForgotView.as_view(), name='forgot'),
     path('api/verify_otp/', VerifyOTP.as_view(), name='verify_otpapi'),
+    # path('verify_otp/<str:email>/', VerifyOTPView.as_view(), name='verify_otp'),
     path('verify_otp/', VerifyOTPView.as_view(), name='verify_otp'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('api/register/',RegisterAPI.as_view(), name='registerapi'),
