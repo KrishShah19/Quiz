@@ -80,6 +80,9 @@
                                 <p>
                                     <label for="id_email">Email address:</label>
                                     <input type="email" maxlength="254" id="id_email" required>
+                                    {% if email_exists %}
+                                    <p style="color: red;">Email already exists. Please use a different email address.</p>
+                                    {% endif %}
                                 </p>
 
 

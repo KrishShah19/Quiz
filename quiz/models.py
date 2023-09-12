@@ -46,7 +46,7 @@ class Question(BaseModel):
     # ]
     category=models.ForeignKey(Category,related_name='category', on_delete=models.CASCADE)
     question=models.CharField(max_length=100)
-    # question_type = models.CharField(max_length=3, choices=QUESTION_TYPES)
+    # question_type = models.CharField(max_length=2, choices=QUESTION_TYPES)
     marks=models.IntegerField(default=1)
 
     def __str__(self) -> str:
@@ -66,13 +66,19 @@ class Answer(BaseModel):
 
     def __str__(self) -> str:
         return self.answer
-    
-# class UserResponse(BaseModel):
-#     user
-#     question_id
-#     answer 
-#     is_correct
 
+# class UserAnswer(BaseModel):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+#     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+#     is_correct = models.BooleanField(default=False)
 
-#     def __str__(self) -> str:
+#     def __str__(self):
 #         return f"{self.user.username} - {self.question.question}"
+
+# class QuizProgress(models.Model):
+#     category=models.ForeignObject(Category, on_delete=models.CASCADE)
+#     timer_state=models.Integer
+#quizprogress table will include:
+#quiz category
+#time state

@@ -1,12 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django import views
 from django.views import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import *
 from .emails import *
-from quiz import serializer
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import login
 from django.contrib.auth import get_user_model
@@ -16,15 +14,30 @@ from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
 from .serializer import UserSerializer
 from .emails import send_otp
+from django.contrib.auth.hashers import make_password  # Import make_password
+from rest_framework import status
+
 # Create your views here.
 class RegisterAPI(APIView):
     def post(self, request):
         try:
             data = request.data
+            email=data.get('email')
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user:
+                return Response({
+                    'status': status.HTTP_409_CONFLICT,
+                    'message': 'Email already exists. Please use a different email address.',
+                    'data': {'email_exists': True}
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
+                
                 print("Serializer is valid")
                 user = serializer.save()
+                password = make_password(data['password'])
+                user = serializer.save(password=password)  # Save the hashed password
                 print("User instance created:", user)
                 send_otp(user.email)
                 return Response({
@@ -159,9 +172,10 @@ class ForgotView(PasswordResetView):
             messages.success(request, 'OTP has been sent to your email.')
             verify_otp_url = reverse('verify_otp', args=[email])
             return HttpResponseRedirect(verify_otp_url)
+            # return render(request, 'forgot.html')
         else:
             messages.error(request, 'Failed to send OTP. Please try again later.')
-            return render(request, 'forgot.html', {'error_message': messages.error})
+            return render(request, 'forgot.html', {'error_message': 'Failed to send OTP. Please try again later.'})
 
 class VerifyOTPView(PasswordResetView):
     template_name = 'registration/verify_otp.html'
@@ -203,31 +217,6 @@ class VerifyOTPView(PasswordResetView):
 #         else:
 #             messages.error(request, 'Failed to send OTP. Please try again later.')
 #             return render(request, 'forgot.html', {'error_message': messages.error})
-        
-# # from django.views.decorators.csrf import csrf_protect
-# # @csrf_protect
-# class VerifyOTPView(PasswordResetView):
-#     template_name = 'registration/verify_otp.html'
-
-#     def get(self, request):
-#         return render(request, self.template_name)
-
-#     def post(self, request):
-#         data = request.POST
-#         email = data.get('email')
-#         otp = data.get('otp')
-#         print()
-
-#         user = User.objects.filter(email=email, otp=otp).first()
-#         if user:
-#             user.is_verified = True
-#             user.save()
-#             messages.success(request, 'OTP verified successfully!')
-#             return redirect('index')
-#         else:
-#             messages.error(request, 'Incorrect OTP. Please try again.')
-#             return render(request, self.template_name)  
-        
 from django.shortcuts import render
 from django.views import View
 
@@ -235,7 +224,10 @@ class RegisterView(View):
     template_name = 'registration/register.html'
 
     def get(self, request):
-        return render(request, self.template_name)
+        email = request.GET.get('email')
+        email_already_exists = User.objects.filter(email=email).exists()
+        
+        return render(request, self.template_name, {'email_exists': email_already_exists})
 
         
 # from django.shortcuts import render, redirect
@@ -279,7 +271,6 @@ class PythonQuiz(View):
 
         questions = list(Question.objects.filter(category=python_category))
         answers = list(Answer.objects.all())    
-        
 
         random.shuffle(questions)
         random.shuffle(answers)
@@ -296,6 +287,8 @@ class PythonQuiz(View):
 
         print("Session Keys:", request.session.keys())
         print("User ID from Session:", request.session.get(f'quiz_progress_{request.user.id}'))
+        print("User ID:", request.user.id)
+
         context = {
             'questions': questions,
             'answers': answers,
@@ -307,14 +300,15 @@ class PythonQuiz(View):
         # Get the session key for this user's quiz progress
         session_key = f'quiz_progress_{request.user.id}'
         quiz_progress = request.session.get(session_key)
+        print("User ID:", request.user.id)
 
         if not quiz_progress:
             # Session has expired or the user is trying to submit without starting the quiz
             return HttpResponseRedirect('/index/')  # Redirect to some appropriate page
         
         # Convert the stored UUID strings back to UUID objects
-        questions_ids = [UUID(question_id) for question_id in quiz_progress['questions']]
-        answers_ids = [UUID(answer_id) for answer_id in quiz_progress['answers']]
+        # questions_ids = [UUID(question_id) for question_id in quiz_progress['questions']]
+        # answers_ids = [UUID(answer_id) for answer_id in quiz_progress['answers']]
         
         # You can access the quiz progress data as quiz_progress['questions'] and quiz_progress['answers']
         
@@ -377,11 +371,4 @@ class LogoutView(View):
         logout(request)
         return redirect('/')
     
-# class UserAnswer(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-#     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-#     is_correct = models.BooleanField(default=False)
 
-#     def __str__(self):
-#         return f"{self.user.username} - {self.question.question}"
