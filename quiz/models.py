@@ -69,14 +69,19 @@ class UserAnswer(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
+    user_input = models.TextField(blank=True, null=True)
     is_correct = models.BooleanField(default=False)
+    marks_obtained = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username} - {self.question.category}"
+    
+    def get_quiz_summary(self):
+        return f"User: {self.user.username}, Question: {self.question.question}, Selected Answer: {self.selected_answer}, User Input: {self.user_input}, Is Correct: {self.is_correct}, Marks Obtained: {self.marks_obtained}"
 
 class QuizProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)  # Assuming you have a Category model
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)  
     timer_state = models.IntegerField(default=0)
     last_activity = models.DateTimeField(default=timezone.now)
 

@@ -208,12 +208,12 @@
       background-color: black;
       border: none;
       height: 100%;
-      transition: transform 0.5s, box-shadow 0.5s; /* Add transition for glow effect */
+      transition: transform 0.5s, box-shadow 0.5s; /* glow effect */
     }
     .card:hover {
       border: 1px solid white;
-      transform: scale(1.06); /* Add a slight zoom effect on hover */
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5) !important; /* Add glow effect on hover */
+      transform: scale(1.05); /* zoom effect on hover */
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 2px rgba(255, 255, 255, 0.5) !important; /* glow effect on hover */
     }
     .card-link {
       text-decoration: none;
@@ -287,8 +287,8 @@
 
     /* Quiz card image styles */
     .card-img {
-      max-height: 200px; /* Limit the height of the card image */
-      object-fit: cover; /* Maintain aspect ratio and cover the container */
+      max-height: 200px; 
+      object-fit: cover; 
       border-radius: 10px;
     }
     .card-text{
@@ -307,15 +307,15 @@
       background-color: black;
       border-radius: 30px;
       padding: 10px;
-      display: flex;
+      display: flex;/
       justify-content: space-between;
       align-items: center;
-      border: 2px solid transparent; /* Add this line to set border color */
-      transition: border-color 0.4s linear; /* Add this line for border color transition */
+      border: 2px solid transparent; 
+      transition: border-color 0.4s linear; 
       margin-right:15px;
     }
     .single-search:hover {
-      border-color: grey; /* Change border color on hover */
+      border-color: grey; 
       box-shadow: green !important;
       box-shadow: 0 0 0px rgba(255, 255, 255, 0.1), 0 0 6px rgba(255, 255, 255, 0.5);
       text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
@@ -377,27 +377,27 @@
       color:white;
     }
     .navbar {
-      background-color: rgba(58, 56, 56, 0.8); /* Use the desired background color here */
+      background-color: rgba(58, 56, 56, 0.8); 
     }
     .navbar-brand {
       transition: transform 0.2s, text-shadow 0.2s;
-      font-size:24px; /* Add transitions for transform and text-shadow */
+      font-size:24px; 
     }
     .navbar-brand:hover {
-      transform: scale(1.1); /* Zoom in slightly on hover */
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow on hover */
+      transform: scale(1.1); 
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
     }
     .logout {
       font-size: 17px;
-      transition: transform 0.2s, box-shadow 0.2s, text-shadow 0.2s; /* Add transitions for transform, box-shadow, and text-shadow */
+      transition: transform 0.2s, box-shadow 0.2s, text-shadow 0.2s; 
     }
     .logout:hover {
-      transform: scale(1.05); /* Add a slight zoom effect on hover */
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5); /* Add glow effect on hover */
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow on hover */
+      transform: scale(1.05); 
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5); 
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
     }
     .btn-outline-secondary.text-white:hover {
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 1px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
   </style>
@@ -422,9 +422,6 @@
             </div>
             <div class="search-expand" id="searchExpand"></div>
           </div>
-          {% comment %} <input id="searchInput" class="form-control me-2" type="search" placeholder="Search for your quiz"
-            aria-label="Search">
-          <button class="btn btn-outline-light me-2" type="button">Search</button> {% endcomment %}
           <div style="display: flex; gap: 10px;">
             <a class="btn btn-outline-light mb-0" href="/" style="font-size:17px;" id="logout">Logout</a>
           </div>

@@ -3,7 +3,6 @@ from .models import *
 import random
 from django.shortcuts import render, HttpResponseRedirect, redirect, reverse
 from django.contrib.auth import logout
-from django.contrib.sessions.models import Session
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.views import View
@@ -220,7 +219,14 @@ class RegisterView(View):
         return render(request, self.template_name, {'email_exists': email_already_exists})
 
 
+from django.shortcuts import render, HttpResponseRedirect, redirect, reverse
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+from .models import Category, Question, Answer, UserAnswer
+
 class PythonQuiz(View):
+    @method_decorator(login_required)
     def get(self, request):
         # Replace 'Django' with the appropriate category name for your Django quiz
         python_category = Category.objects.get(category_name='Python')
@@ -231,15 +237,14 @@ class PythonQuiz(View):
         random.shuffle(answers)
 
         # Calculate the total number of FIB questions
-        total_fib_questions = len(
-            [q for q in questions if q.question_type == 'FIB'])
+        total_fib_questions = len([q for q in questions if q.question_type == 'FIB'])
         start_quiz = not request.session.get('quiz_started', False)
 
         # If the quiz should start, store the quiz start time in the session
         if start_quiz:
-            request.session['quiz_start_time'] = timezone.now().strftime(
-                '%Y-%m-%d %H:%M:%S')
+            request.session['quiz_start_time'] = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
             request.session['quiz_started'] = True
+
         context = {
             'questions': questions,
             'answers': answers,
@@ -262,49 +267,34 @@ class PythonQuiz(View):
         total_score = 0  # Initialize the total score
 
         for question in questions:
-            selected_answer_uuid = request.POST.get(
-                f'question_{question.uuid}')
+            selected_answer_uuid = request.POST.get(f'question_{question.uuid}')
             user_input = request.POST.get(f'question_{question.uuid}_input')
-            correct_answer = None
-
-            try:
-                correct_answer = Answer.objects.get(
-                    question=question, is_correct=True)
-            except ObjectDoesNotExist:
-                # Handle the case where the correct answer doesn't exist
-                pass
+            correct_answer = Answer.objects.get(
+                question=question, is_correct=True)
 
             if question.question_type == 'FIB':
                 # For FIB questions, use user_input directly
                 user_answer_text = user_input if user_input else ""
-                is_correct = user_input.strip().lower(
-                ) == correct_answer.answer.strip().lower() if user_input else False
+                is_correct = user_input.strip().lower() == correct_answer.answer.strip().lower() if user_input else False
                 if is_correct:
                     total_score += question.score
                     total_fib_questions += 1  # Increment FIB question count
                 if user_input:
                     total_attempted += 1  # Increment total questions attempted for FIB
             else:
-                try:
-                    selected_answer = Answer.objects.get(
-                        uuid=selected_answer_uuid)
-                    user_answer_text = selected_answer.answer if selected_answer else ""
-                    is_correct = selected_answer_uuid == str(
-                        correct_answer.uuid) if selected_answer else False
-                    if is_correct:
-                        total_score += question.score
-                    if selected_answer_uuid:
-                        total_attempted += 1  # Increment total questions attempted for MCQ
-                except ObjectDoesNotExist:
-                    # Handle the case where the selected answer UUID doesn't exist
-                    selected_answer = None
-                    user_answer_text = ""
-                    is_correct = False
+                selected_answer = Answer.objects.get(uuid=selected_answer_uuid)
+                user_answer_text = selected_answer.answer if selected_answer else ""
+                is_correct = selected_answer_uuid == str(
+                    correct_answer.uuid) if selected_answer else False
+                if is_correct:
+                    total_score += question.score
+                if selected_answer_uuid:
+                    total_attempted += 1  # Increment total questions attempted for MCQ
 
             user_answer = {
                 'question_text': question.question,
                 'user_answer': user_answer_text,
-                'correct_answer': correct_answer.answer if correct_answer else 'N/A',
+                'correct_answer': correct_answer.answer,
                 'is_correct': is_correct,
             }
 
@@ -315,7 +305,9 @@ class PythonQuiz(View):
                 user=request.user,
                 question=question,
                 selected_answer=selected_answer,
+                user_input=user_input,  # Store user's input for FIB questions
                 is_correct=is_correct,
+                marks_obtained=question.score if is_correct else 0,  # Store marks obtained
             )
 
         # Calculate the percentage based on the total score and the maximum possible score
@@ -331,26 +323,57 @@ class PythonQuiz(View):
         request.session['python_quiz_percentage'] = round(percentage, 2)
         request.session['python_quiz_total_fib_questions'] = total_fib_questions
 
-        # Redirect to the results page
-        return HttpResponseRedirect(reverse('python_result'))
+        # Create a UserAnswer object to store quiz summary
+        quiz_summary = UserAnswer.objects.create(
+            user=request.user,
+            question=None,  # Store None for summary question
+            selected_answer=None,  # Store None for summary question
+            user_input=None,  # Store None for summary question
+            is_correct=None,  # Store None for summary question
+            marks_obtained=total_score,  # Store the total score as marks obtained
+            quiz_attempted=python_category,  # Store the quiz category as quiz attempted
+            total_score=max_possible_score,  # Store the maximum possible score
+            questions_info=user_answers,  # Store the list of user's answers for all questions
+        )
 
+        return redirect('python_result')  # Redirect to the quiz result page
 
 class PythonResultView(View):
     def get(self, request):
-        # Retrieve the user's score, user answers, and total questions attempted from session variables
-        score = request.session.get('python_quiz_score', '0/0')
+        # Retrieve quiz results from session variables
         user_answers = request.session.get('python_quiz_user_answers', [])
-        total_questions_attempted = len(user_answers)
+        score = request.session.get('python_quiz_score', '0/0')
         percentage = request.session.get('python_quiz_percentage', 0)
+        total_fib_questions = request.session.get(
+            'python_quiz_total_fib_questions', 0)
 
         context = {
+            'user_answers': user_answers,
             'score': score,
             'percentage': percentage,
-            'user_answers': user_answers,
-            'total_questions_attempted': total_questions_attempted,
+            'total_fib_questions': total_fib_questions,
         }
 
         return render(request, 'python_result.html', context)
+
+
+
+# class PythonResultView(View):
+#     def get(self, request):
+#         # Retrieve the user's score, user answers, and total questions attempted from session variables
+#         score = request.session.get('python_quiz_score', '0/0')
+#         user_answers = request.session.get('python_quiz_user_answers', [])
+#         total_questions_attempted = len(user_answers)
+#         percentage = request.session.get('python_quiz_percentage', 0)
+
+#         context = {
+#             'score': score,
+#             'percentage': percentage,
+#             'user_answers': user_answers,
+#             'total_questions_attempted': total_questions_attempted,
+#         }
+
+#         return render(request, 'python_result.html', context)
 
 
 class DjangoQuizView(View):
