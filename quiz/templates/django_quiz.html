@@ -1,2 +1,231 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <title>Django Quiz</title>
-hello
+<style>
+    body {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    /* Add any additional CSS styles as needed */
+    .quiz-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #343a40;
+        border-radius: 10px;
+        background-color: #1e1e1e;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        position: center !important;
+    }
+
+    .question {
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    .options {
+        margin-top: 10px;
+    }
+
+    .options label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    /* Add this custom style in your CSS file */
+    .custom-submit-button {
+        background-color: black;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border: 1px solid white;
+        /* Set the desired border color */
+        border-radius: 15px;
+        /* Add any other styles you want */
+        margin-right: auto;
+        font-family: 'Montserrat', sans-serif;
+        /* Replace 'Your-Font-Family' with the actual font family you want to use */
+        font-size: 15px;
+    }
+
+    /* Add this CSS rule to style the question numbers */
+    h2::before {
+        content: "Q." attr(data-number) " ";
+        /* Add a number and a period before each question */
+        font-weight: bold;
+    }
+
+    .header {
+        display: flex;
+        /* Use flexbox for header layout */
+        align-items: center;
+        /* Vertically center the content */
+        justify-content: space-between;
+        /* Pushes items to the edges */
+        margin-bottom: 20px;
+        /* Add space between header and questions */
+
+    }
+
+    .timer-container {
+        font-size: 24px;
+        color: white;
+        display: inline-block;
+        background-color: #343a40;
+        padding: 8px 10px;
+        border-radius: 5px;
+        border: 1px solid !important;
+        margin-left: auto;
+        /* Shift the timer container to the right */
+    }
+
+    /* Add this CSS rule to style the cursor on hover */
+    .custom-submit-button:hover {
+        cursor: pointer;
+    }
+
+    .answer-input {
+        width: 50%;
+        padding: 10px;
+        border: none;
+        background-color: transparent;
+        /* Background color to match the page */
+        color: white;
+        /* Text color */
+        border-radius: 0px;
+        font-size: 16px;
+        outline: none;
+        border-bottom: 1px solid #ccc !important;
+        margin-left: 35px;
+        /* Shift the timer container to the right */
+    }
+
+    .answer-input::placeholder {
+        color: #ccc;
+        /* Placeholder text color */
+        font-family: 'Montserrat', sans-serif;
+        /* Replace with your desired font family */
+        font-size: 16px;
+        /* Adjust the font size if needed */
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="quiz-container">
+        <div class="header">
+            <h1 class="text-center mb-4 mt-0">Django Quiz
+                <div class="timer-container text-center mt-3">
+                    <span id="minutes">00</span>:<span id="seconds">00</span>
+                </div>
+            </h1>
+        </div>
+
+        <form method="post" onsubmit="return validateForm()">
+            {% csrf_token %}
+            {% for question in questions %}
+            <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
+            {% if question.question_type == 'FIB' %}
+            <p><input type="text" name="question_{{ question.uuid }}_input" class="answer-input"
+                    autocomplete="" placeholder="Enter your answer">
+                <p /><br>
+                {% else %}
+            <ul class="options">
+                {% for answer in answers %}
+                {% if answer.question == question %}
+                <li>
+                    <label>
+                        <input type="radio" name="question_{{ question.uuid }}" class="answer-radio"
+                            value="{{ answer.uuid }}">
+                        {{ answer.answer }}
+                    </label>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul><br>
+            {% endif %}
+            {% endfor %}
+            <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
+        </form> 
+    </div>
+</div>
+
+<script>
+    const submitBtn = document.querySelector('.custom-submit-button');
+
+    let minutes = 5; // Set the quiz time in minutes
+    let seconds = 0;
+
+    function updateTimer() {
+        if (seconds === 0) {
+            if (minutes === 0) {
+                clearInterval(timerInterval); // Stop the timer
+                alert("Time is up! Quiz is completed.");
+                // Redirect to the home page when the timer ends
+                window.location.href = "/index";
+            } else {
+                minutes--;
+                seconds = 59;
+            }
+        } else {
+            seconds--;
+        }
+
+        document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+        document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+    }
+
+    // Start the timer countdown
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    function validateForm() {
+        const answerRadios = document.querySelectorAll('.answer-radio');
+        const answerInputs = document.querySelectorAll('.answer-input');
+        const answeredQuestions = new Set();
+
+        answerRadios.forEach(radio => {
+            if (radio.checked) {
+                // Extract the question UUID from the radio button's name attribute
+                const questionUuid = radio.name.split('_')[1];
+                answeredQuestions.add(questionUuid);
+            }
+        });
+
+        answerInputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                // Extract the question UUID from the input field's name attribute
+                const questionUuid = input.name.split('_')[1];
+                answeredQuestions.add(questionUuid);
+            }
+        });
+
+        // Count the number of FIB questions
+        const fibQuestions = document.querySelectorAll('.fib-question');
+        let fibQuestionsCount = fibQuestions.length;
+
+        fibQuestions.forEach(fibInput => {
+            const questionUuid = fibInput.name.split('_')[1];
+            const fibRadio = document.querySelector(`input[name="question_${questionUuid}"]:checked`);
+            if (!fibRadio) {
+                // If the corresponding radio button is not checked for an FIB question, create a hidden input with an empty value
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `question_${questionUuid}`;
+                hiddenInput.value = '';
+                document.querySelector('form').appendChild(hiddenInput);
+                fibQuestionsCount--;
+            }
+        });
+
+        if (answeredQuestions.size !== {{ total_questions }}) {
+        alert("Quiz not completed. Please answer all questions.");
+        return false;
+    }
+    
+
+    return true;
+    }
+
+</script>
+{% endblock %}

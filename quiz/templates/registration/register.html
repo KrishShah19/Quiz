@@ -2,53 +2,66 @@
 {% block content %}
 <!DOCTYPE html>
 <html>
+<title>Register</title>
+<style>
+    .custom-button {
+        background-color: #4CAF50;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .custom-button:hover {
+        border: 2px solid white;
+        /* Add border on hover */
+        transform: scale(1.05);
+        /* Add zoom effect on hover */
+    }
+</style>
 
 <head>
     <title>Register</title>
     <!-- Add your CSS and other common head elements here -->
     <script>
         const csrfToken = "{{ csrf_token }}";
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Get a reference to the button by its ID
             var myButton = document.getElementById('register_button');
-            
-            
+
+
             // Add a click event listener to the button
-            myButton.addEventListener('click', function() {
+            myButton.addEventListener('click', function () {
                 var userName = document.getElementById("id_username").value;
                 var emaIl = document.getElementById('id_email').value;
                 var passwOrd = document.getElementById('id_password1').value;
                 // Your code to handle the button click goes here
                 //alert('Button clicked!');
-                console.log(csrfToken,"ooooooooooooooooo")
+                console.log(csrfToken, "ooooooooooooooooo")
                 const request_body = {
                     method: "POST",
-                    headers: {'Content-Type':'application/json', 'X-CSRFToken': csrfToken},
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                     body: JSON.stringify({
-                        username:userName,
-                        email:emaIl,
-                        password:passwOrd
+                        username: userName,
+                        email: emaIl,
+                        password: passwOrd
                     })
                 }
                 console.log(request_body)
-                const response = fetch('http://127.0.0.1:8000/api/register/',request_body).then(response => response.json()) // Use .json() to parse the JSON response
-                .then(data => {
-                    console.log(data);
-                    // Handle the response data here
-                })
-                .catch((e)=>{
-                    console.log(e.response.data)
-                })
-                alert("ttttttttttt")
+                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) // Use .json() to parse the JSON response
+                    .then(data => {
+                        console.log(data);
+                        // Handle the response data here
+                    })
+                    .catch((e) => {
+                        console.log(e.response.data)
+                    })
                 // You can replace the alert with your desired actions.
-            
-                 // Prevent the default form submission
-                 
-                });
-                event.preventDefault();
+
+                // Prevent the default form submission
+
+            });
+            event.preventDefault();
         });
-        </script>
-        
+    </script>
+
 </head>
 
 <body>
@@ -73,7 +86,7 @@
                                 {% csrf_token %}
                                 <p>
                                     <label for="id_username">Username:</label>
-                                    <input type="text" id="id_username"  maxlength="150" autofocus required >
+                                    <input type="text" id="id_username" maxlength="150" autofocus required>
                                 </p>
 
 
@@ -81,37 +94,35 @@
                                     <label for="id_email">Email address:</label>
                                     <input type="email" maxlength="254" id="id_email" required>
                                     {% if email_exists %}
-                                    <p style="color: red;">Email already exists. Please use a different email address.</p>
-                                    {% endif %}
+                                <p style="color: red;">Email already exists. Please use a different email address.</p>
+                                {% endif %}
                                 </p>
 
 
                                 <p>
-                                    {% comment %} <label for="id_password1">Password:</label>
-                                    <input type="password" name="password1" autocomplete="new-password" required
-                                        id="id_password1"> {% endcomment %}
-                                    
-                                        <label for="id_password1">Password:</label>
-                                        {% comment %} <input type="password" name="password1" autocomplete="new-password" required id="id_password1"> {% endcomment %}
-                                        <input type="password" required
-                                        id="id_password1"
-                                        pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-                                        title="Your password must meet the following requirements:
+                                    <label for="id_password1">Password:</label>
+                                    {% comment %} <input type="password" name="password1" autocomplete="new-password"
+                                        required id="id_password1"> {% endcomment %}
+                                    <input type="password" required id="id_password1"
+                                        pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" title="Your password must meet the following requirements:
                                         - Must contain at least 8 characters
                                         - Must contain at least one letter, one number, and one special character">
-
-                                    <span class="helptext custom-font">
-                                        <ul>
-                                            <li>Your password can’t be too similar to your other personal information.
-                                            </li>
-                                            <li>Your password must contain at least 8 characters.</li>
-                                            <li>Your password can’t be a commonly used password.</li>
-                                            <li>Your password can’t be entirely numeric.</li>
-                                        </ul>
-                                    </span>
                                 </p>
-                                <p><button id="register_button" type="submit" class="btn btn-primary btn-block mb-4">Send OTP</button></p>
-                                <!-- Rest of your form fields -->
+
+                                <span class="helptext custom-font">
+                                    <ul>
+                                        <li>Your password can’t be too similar to your other personal information.
+                                        </li>
+                                        <li>Your password must contain at least 8 characters.</li>
+                                        <li>Your password can’t be a commonly used password.</li>
+                                        <li>Your password can’t be entirely numeric.</li>
+                                    </ul>
+                                </span>
+                                </p>
+                                <p>
+                                    <button id="register_button" type="submit"
+                                        class="btn btn-primary btn-block mb-4 custom-button">Send OTP</button>
+                                </p> 
                             </form>
                         </div>
                     </div>
@@ -121,5 +132,6 @@
     </div>
 
 </body>
+
 </html>
 {% endblock %}

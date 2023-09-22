@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block content %}
+<title>Django Quiz Results</title>
+
+<style>
+  body {
+    background-color: grey;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    background-color: #222; /* Lighter background color for the container */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1s ease-in; /* Add fade-in animation */
+    max-width: 800px; /* Limit container width */
+    margin: 0 auto; /* Center the container horizontally */
+    margin-top: 20px; /* Add top margin */
+    margin-bottom:20px;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  h2, h3 {
+    color: lightblue;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  table th, table td {
+    padding: 10px;
+    border: 1px solid lightblue; /* Add borders to table cells */
+    font-weight: normal; /* Remove bold font-weight */
+  }
+
+  table th {
+    background-color: #343a40; /* Header background color */
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add text shadow for a glow effect */
+  }
+
+  table td {
+    background-color: #1e1e1e; /* Table cell background color */
+    box-shadow: 0 0 5px rgba(173, 216, 230, 0.5); /* Add a subtle box-shadow for elegance */
+    padding:15px;
+  }
+
+  table td.result {
+    color: green; /* Green color for correct answers */
+    text-shadow: 0 0 5px green; /* Add glow effect for correct answers */
+
+  }
+
+  table td.result.incorrect {
+    color: red; /* Red color for incorrect answers */
+    text-shadow: 0 0 5px red; /* Add glow effect for correct answers */
+
+  }
+
+  .message {
+    font-size: 18px;
+    margin-top: 20px;
+    color: #fff;
+  }
+
+  .message.passed {
+    color: lightblue; /* Set text color to white for congrats message */
+  }
+
+  .message.failed {
+    color: lightblue;
+  }
+
+  .message.percentage {
+    color: {% if percentage < 35 %}red{% else %}green{% endif %}; /* Set color based on percentage */
+  }
+
+  .button-container {
+    margin-top: 20px;
+  }
+
+  .button-container a {
+    margin: 10px;
+    padding: 5px 7px;
+    background-color: #343a40;
+    border: 1px solid lightblue;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    border-radius: 15px;
+    display: inline-block;
+    transition: transform 0.3s ease; /* Add transition for the scale animation */
+  }
+
+  .button-container a:hover {
+    background-color: #1e1e1e;
+    transform: scale(1.1); /* Scale the link on hover */
+    box-shadow: 0 0 4px lightblue; /* Add a subtle glow effect on hover */
+  }
+</style>
+
+<div class="container">
+  <h2>Django Quiz Results</h1>
+
+  <h3>Your Score: {{ score }}</h3>
+
+  <!-- ... -->
+<table>
+  <thead>
+      <tr>
+          <th>Question</th>
+          <th>Your Answer</th>
+          <th>Correct Answer</th>
+          <th>Result</th>
+      </tr>
+  </thead>
+  <tbody>
+      {% for user_answer in user_answers %}
+      <tr>
+          <td>{{ user_answer.question_text }}</td>
+          <td>
+              {% if user_answer.question_text|lower not in user_answer.user_answer|lower %}
+                  {{ user_answer.user_answer }}
+                  <!-- Add JavaScript to print the user's answer to the console -->
+                  <script>
+                      console.log("User's Answer (FIB Question): {{ user_answer.user_answer }}");
+                  </script>
+              {% else %}
+                  {{ user_answer.user_answer }}
+              {% endif %}
+          </td>
+          <td>{{ user_answer.correct_answer }}</td>
+          <td class="result {% if not user_answer.is_correct %}incorrect{% endif %}">
+              {% if user_answer.is_correct %}
+                  Correct
+              {% else %}
+                  Incorrect
+              {% endif %}
+          </td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+<!-- ... -->
+
+  <div class="message {% if percentage < 35 %}failed{% else %}passed{% endif %}">
+    {% if percentage < 35 %}
+      Oops! You couldn't clear the quiz, you got <span class="message percentage">{{ percentage }}%</span>
+    {% else %}
+      Congrats {{ user.username }}! You have passed the quiz with <span class="message percentage">{{ percentage }}%</span>
+    {% endif %}
+  </div>
+
+  <div class="message total-attempted">
+    You attempted a total of {{ total_questions_attempted }} questions, including {{ total_fib_questions }} FIB questions.
+  </div>
+
+
+  <div class="button-container">
+    <a href="{% url 'index' %}">Back to Home</a>
+    <!-- Add more buttons or links here as needed -->
+  </div>
+</div>
+{% endblock %}

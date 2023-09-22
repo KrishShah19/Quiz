@@ -5,11 +5,9 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from .manager import UserManager
 import uuid
-
+from django.utils import timezone
 
 class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
@@ -40,14 +38,14 @@ class Category(BaseModel):
         return self.category_name
 
 class Question(BaseModel):
-    # QUESTION_TYPES = [
-    #     ('MCQ', 'Multiple Choice Question'),
-    #     ('FIB', 'Fill in the Blanks'),
-    # ]
+    QUESTION_TYPES = [
+        ('MCQ', 'Multiple Choice Question'),
+        ('FIB', 'Fill in the Blanks'),
+    ]
     category=models.ForeignKey(Category,related_name='category', on_delete=models.CASCADE)
     question=models.CharField(max_length=100)
-    # question_type = models.CharField(max_length=2, choices=QUESTION_TYPES)
-    marks=models.IntegerField(default=1)
+    question_type = models.CharField(max_length=3, choices=QUESTION_TYPES,default="MCQ")
+    score=models.IntegerField(default=1)
 
     def __str__(self) -> str:
         return self.question
@@ -67,18 +65,20 @@ class Answer(BaseModel):
     def __str__(self) -> str:
         return self.answer
 
-# class UserAnswer(BaseModel):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-#     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-#     is_correct = models.BooleanField(default=False)
+class UserAnswer(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
+    is_correct = models.BooleanField(default=False)
 
-#     def __str__(self):
-#         return f"{self.user.username} - {self.question.question}"
+    def __str__(self):
+        return f"{self.user.username} - {self.question.category}"
 
-# class QuizProgress(models.Model):
-#     category=models.ForeignObject(Category, on_delete=models.CASCADE)
-#     timer_state=models.Integer
-#quizprogress table will include:
-#quiz category
-#time state
+class QuizProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)  # Assuming you have a Category model
+    timer_state = models.IntegerField(default=0)
+    last_activity = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.category.category_name}"

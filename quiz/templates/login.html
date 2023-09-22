@@ -18,19 +18,17 @@
                                 <form method="post">
                                     {% csrf_token %}
                                     <div class="form-outline form-white mb-4">
-                                        <input type="text" id="username" class="form-control form-control-lg" name="username" required/>
+                                        <input type="text" id="username" class="form-control form-control-lg mb-2" name="username" placeholder="Enter Username" autocomplete="off"required/>
                                         <label class="form-label" for="username">Username</label>
                                     </div>
 
                                     <div class="form-outline form-white mb-4">
-                                        <input type="password" id="password" class="form-control form-control-lg" name="password" required/>
+                                        <input type="password" id="password" class="form-control form-control-lg mb-2" name="password" placeholder="Enter Password" required/>
                                         <label class="form-label" for="password">Password</label>
                                     </div>
 
-                                    <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="{% url 'forgot' %}">Forgot password?</a></p>
-
-
-                                    <button class="btn btn-outline-light btn-lg px-500" type="submit">Login</button>
+                                    <p class="small mb-4 pb-lg-2"><a class="text-white-50" href="{% url 'forgot' %}">Forgot password?</a></p>
+                                    <button class="btn btn-outline-light btn-lg px-500 mb-0" type="submit">Login</button>
                                 </form>
                             </div>
                             <div>

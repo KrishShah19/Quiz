@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html>
 
 <head>
@@ -30,6 +30,36 @@
       cursor: pointer; /* Change cursor style on hover */
       color: inherit; /* Use the default text color */
     }
+    .hover-text {
+      display: none;
+      padding: 100px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      position: absolute;
+      top: 100%; /* Position below the card */
+      left: 0;
+      right: 0;
+      transition: opacity 0.3s;
+      z-index: 1; /* Ensure it appears above other content */
+  }
+  
+  .card:hover .hover-text {
+      display: block;
+      opacity: 1;
+  }
+  .card-body {
+    position: relative;
+  }
+  .text-container {
+    padding: 10px;
+    max-height: 0px;
+    overflow: hidden;
+    transition: max-height 0.3s;
+  }
+
+  .card:hover .text-container {
+    max-height:140px; /* Adjust the max-height as needed */
+  }
   </style>
 </head>
 
@@ -43,9 +73,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-10 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
         </ul>
         <form class="d-flex" role="search">
           <input id="searchInput" class="form-control me-2" type="search" placeholder="Search for your quiz"
@@ -58,7 +85,7 @@
       </div>
     </div>
   </nav><br>
-  <h5 class="fw-bold mb-5 text-white">Welcome {{request.user}}</h5>
+  <h5 class="fw-bold mb-5 text-white">Welcome {{request.user}}!</h5>
     <p class="text-white mt-0" style="font-size:25px">Quiz Progress:</p>
     <div class="progress">
       <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="30" aria-valuemin="0"
@@ -72,23 +99,30 @@
         <div class="col">
           <div class="card shadow-lg rounded mb-3">
             <a href="{% url 'python_quiz' %}" class="card-link">
-            <div class="card-body bg-dark rounded">
-              <img src="https://source.unsplash.com/1100x600/?Python " class="w-100" alt="...">
-              <p class="card-text text-white mt-2">Python Quiz</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <p><a href="{% url 'python_quiz' %}" class="btn btn-sm btn-outline-secondary text-white">Start</a></p>
+              <div class="card-body bg-dark rounded">
+                <img src="https://images.hdqwalls.com/download/python-logo-4k-i6-1280x720.jpg" class="w-100 rounded" alt="...">
+                <p class="card-text text-white mt-2 mb-2">Python Quiz</p>
+                <div class="text-container mb-2">
+                  <p class="additional-text text-white">Test your Python prowess with our Python quiz! From basic syntax to advanced concepts, challenge your Python knowledge and see if you can emerge as a Python guru.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <p><a href="{% url 'python_quiz' %}" class="btn btn-sm btn-outline-secondary text-white">Start</a></p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
-        </div>
+        </div>        
         <div class="col">
           <div class="card shadow-lg rounded">
             <a href="{% url 'django_quiz' %}" class="card-link">
             <div class="card-body bg-dark rounded">
-              <img src="https://source.unsplash.com/1100x600/?Django" class="d-block w-100" alt="...">
+              <img src="https://i0.wp.com/www.skysilk.com/blog/wp-content/uploads/2018/01/python-django-logo.jpg?fit=1280%2C720&ssl=1" class="d-block w-100 rounded" alt="...">
               <p class="card-text text-white mt-2">Django Quiz</p>
+              <div class="text-container">
+                <p class="additional-text text-white mb-2">Test your Django skills with our Django quiz! From models to views, challenge your Django knowledge and see if you can become a Django expert.</p>
+              </div>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <p><a href="{% url 'django_quiz' %}" class="btn btn-sm btn-outline-secondary text-white">Start</a></p>
@@ -101,8 +135,11 @@
           <div class="card shadow-lg rounded">
             <a href="{% url 'java_quiz' %}" class="card-link">
             <div class="card-body bg-dark rounded">
-              <img src="https://source.unsplash.com/1100x600/?JavaScript" class="d-block w-100" alt="...">
+              <img src="https://media.proglib.io/wp-uploads/2017/12/maxresdefault.jpg" class="d-block w-100 rounded" alt="...">
               <p class="card-text text-white mt-2">JavaScript Quiz</p>
+              <div class="text-container mb-2">
+                <p class="additional-text text-white">Put your JavaScript skills to the test with our JavaScript quiz! Challenge your JavaScript knowledge and see if you can master the world of web development.</p>
+              </div>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <p><a href="{% url 'java_quiz' %}" class="btn btn-sm btn-outline-secondary text-white">Start</a></p>
@@ -144,5 +181,353 @@
         </script>
 </body>
 
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+  <title>Quizzy</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <style>
+    /* Global styles */
+    body {
+      background-color: #343a40 !important;
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Card styles */
+    .card {
+      background-color: black;
+      border: none;
+      height: 100%;
+      transition: transform 0.5s, box-shadow 0.5s; /* Add transition for glow effect */
+    }
+    .card:hover {
+      border: 1px solid white;
+      transform: scale(1.06); /* Add a slight zoom effect on hover */
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5) !important; /* Add glow effect on hover */
+    }
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-body {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .text-container {
+      padding: 10px;
+      max-height: 0px;
+      overflow: hidden;
+      transition: max-height 0.3s;
+      text-align: center;
+    }
+
+    .card:hover .text-container {
+      max-height: 100%;
+    }
+
+    /* Quiz progress styles */
+    .progress {
+      height: 20px;
+      margin-bottom: 20px;
+      background-color: #343a40;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-bar {
+      background-color: #007bff;
+      border-radius: 10px;
+    }
+
+    /* Quiz container styles */
+    .quiz-container {
+      background-color: rgba(58, 56, 56, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    /* Header styles */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    /* Welcome text styles */
+    .welcome-text {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    /* Quiz selection text styles */
+    .quiz-selection-text {
+      font-size: 32px;
+      margin: 20px 0;
+    }
+
+    /* Quiz card image styles */
+    .card-img {
+      max-height: 200px; /* Limit the height of the card image */
+      object-fit: cover; /* Maintain aspect ratio and cover the container */
+      border-radius: 10px;
+    }
+    .card-text{
+      font-size: 20px;
+    }
+    /* Additional text styles */
+    .additional-text {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    /* Search bar styles */
+    .single-search {
+      margin-bottom: auto;
+      margin-top: auto;
+      height: 40px;
+      background-color: black;
+      border-radius: 30px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid transparent; /* Add this line to set border color */
+      transition: border-color 0.4s linear; /* Add this line for border color transition */
+      margin-right:15px;
+    }
+    .single-search:hover {
+      border-color: grey; /* Change border color on hover */
+      box-shadow: green !important;
+      box-shadow: 0 0 0px rgba(255, 255, 255, 0.1), 0 0 6px rgba(255, 255, 255, 0.5);
+      text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+    }
+    .single-search::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    .searchInput {
+      border: none;
+      outline:none;
+      width: 0;
+      line-height: 10px;
+      transition: width 0.3s linear;
+      flex: 0.5;
+      border-radius: 1000px;
+      
+    }
+    .single-search:hover > .searchInput {
+      padding: 0 10px;
+      width: 250px;
+      caret-color: white;
+      transition: width 0.25s linear;
+      
+    }
+
+    .single-search:hover > .icon-area {
+      color: black;
+    }
+    .single-search .searchInput {
+      border: none; /* Remove border */
+      outline: none; /* Remove outline */
+      box-shadow: none; /* Remove box-shadow */
+      background-color: black;
+      
+    }
+    
+    /* Change border color on hover */
+    .single-search:hover .searchInput {
+      border-color: red; /* Change border color on hover */
+    }
+    .icon-area {
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      display: flex;
+      text-decoration: none;
+    }
+    .fa-search {
+      font-size: 20px;
+    }
+    .icon-area .fa-search {
+      color: white;
+    }
+    .searchInput::placeholder{
+      color:white;
+    }
+    .navbar {
+      background-color: rgba(58, 56, 56, 0.8); /* Use the desired background color here */
+    }
+    .navbar-brand {
+      transition: transform 0.2s, text-shadow 0.2s;
+      font-size:24px; /* Add transitions for transform and text-shadow */
+    }
+    .navbar-brand:hover {
+      transform: scale(1.1); /* Zoom in slightly on hover */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow on hover */
+    }
+    .logout {
+      font-size: 17px;
+      transition: transform 0.2s, box-shadow 0.2s, text-shadow 0.2s; /* Add transitions for transform, box-shadow, and text-shadow */
+    }
+    .logout:hover {
+      transform: scale(1.05); /* Add a slight zoom effect on hover */
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5); /* Add glow effect on hover */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow on hover */
+    }
+    .btn-outline-secondary.text-white:hover {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark container-fluid">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/index">Quizzy</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-10 mb-lg-0">
+        </ul>
+        <form class="d-flex" role="search">
+          <div class="search-container">
+            <div class="single-search" id="searchBar">
+              <input class="searchInput" type="search" id="searchInput" placeholder="Search for your quiz" autocomplete="off" style="color:white;">
+              <a href="#" class="icon-area"><i class="fa fa-search" id="searchIcon" style="color: white;"></i></a>
+            </div>
+            <div class="search-expand" id="searchExpand"></div>
+          </div>
+          {% comment %} <input id="searchInput" class="form-control me-2" type="search" placeholder="Search for your quiz"
+            aria-label="Search">
+          <button class="btn btn-outline-light me-2" type="button">Search</button> {% endcomment %}
+          <div style="display: flex; gap: 10px;">
+            <a class="btn btn-outline-light mb-0" href="/" style="font-size:17px;" id="logout">Logout</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </nav><br>
+  <br>
+  <div class="container mt-4">
+    <div class="quiz-container">
+      <div class="header">
+        <h4 class="fw-bold mb-0 text-white">Welcome {{ request.user }}!</h5>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="30" aria-valuemin="0"
+            aria-valuemax="100">Quiz Progress</div>
+        </div>
+      </div>
+      <p class="quiz-selection-text">Select the Quiz of Your Choice!</p>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col">
+          <div class="card shadow-lg rounded">
+            <a href="{% url 'python_quiz' %}" class="card-link">
+              <div class="card-body">
+                <img src="https://images.hdqwalls.com/download/python-logo-4k-i6-1280x720.jpg" class="card-img"
+                  alt="Python Quiz">
+                <p class="card-text mt-2 mb-2 text-white">Python Quiz</p>
+                <div class="text-container">
+                  <p class="additional-text text-white">Test your Python prowess with our Python quiz! From basic syntax to advanced concepts, challenge your Python knowledge and see if you can emerge as a Python guru.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <p><a href="{% url 'python_quiz' %}" class="btn btn-sm btn-outline-secondary text-white" style="font-size:17px;">Start</a></p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card shadow-lg rounded">
+            <a href="{% url 'django_quiz' %}" class="card-link">
+              <div class="card-body">
+                <img
+                  src="https://i0.wp.com/www.skysilk.com/blog/wp-content/uploads/2018/01/python-django-logo.jpg?fit=1280%2C720&ssl=1"
+                  class="card-img" alt="Django Quiz">
+                <p class="card-text mt-2 text-white">Django Quiz</p>
+                <div class="text-container">
+                  <p class="additional-text text-white">Test your Django skills with our Django quiz! From models to views, challenge your Django knowledge and see if you can become a Django expert.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <p><a href="{% url 'django_quiz' %}" class="btn btn-sm btn-outline-secondary text-white" style="font-size:17px; text-shadow: #007bff;">Start</a></p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card shadow-lg rounded">
+            <a href="{% url 'java_quiz' %}" class="card-link">
+              <div class="card-body">
+                <img src="https://media.proglib.io/wp-uploads/2017/12/maxresdefault.jpg" class="card-img"
+                  alt="JavaScript Quiz">
+                <p class="card-text mt-2 text-white">JavaScript Quiz</p>
+                <div class="text-container">
+                  <p class="additional-text text-white">Put your JavaScript skills to the test with our JavaScript quiz! Challenge your JavaScript knowledge and see if you can master the world of web development.</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <p><a href="{% url 'java_quiz' %}" class="btn btn-sm btn-outline-secondary text-white" style="font-size:17px;">Start</a></p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript code for search functionality
+    const searchInput = document.getElementById('searchInput');
+    const quizCards = document.querySelectorAll('.card');
+    const quizContainer = document.querySelector('.quiz-container');
+
+    
+    searchInput.addEventListener('input', function () {
+      const searchTerm = searchInput.value.toLowerCase();
+
+      quizCards.forEach(card => {
+        const cardText = card.querySelector('.card-text').textContent.toLowerCase();
+        if (cardText.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      quizContainer.scrollTo(0, 0);
+    });
+  </script>
+</body>
 </html>
 {% endblock %}

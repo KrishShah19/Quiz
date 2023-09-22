@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from quiz.views import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
@@ -32,6 +33,15 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('api/register/',RegisterAPI.as_view(), name='registerapi'),
     path('python_quiz/', PythonQuiz.as_view(), name='python_quiz'),
-    path('django_quiz/', DjangoQuiz.as_view(), name='django_quiz'),
-    path('java_quiz/', JavaQuiz.as_view(), name='java_quiz')
+    path('django_quiz/', DjangoQuizView.as_view(), name='django_quiz'),
+    path('java_quiz/', JavaQuiz.as_view(), name='java_quiz'),
+
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('java_quiz/result/', JavaResultView.as_view(), name='java_result'),
+    path('django_quiz/result/', DjangoResultView.as_view(), name='django_result'),
+    path('python_quiz/result/', PythonResultView.as_view(), name='python_result'),
+
 ]

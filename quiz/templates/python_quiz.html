@@ -40,25 +40,32 @@
         color: white;
         border: none;
         padding: 10px 20px;
-        border: 1px solid white; /* Set the desired border color */
+        border: 1px solid white;
+        /* Set the desired border color */
         border-radius: 15px;
         /* Add any other styles you want */
         margin-right: auto;
-        font-family: 'Montserrat', sans-serif; /* Replace 'Your-Font-Family' with the actual font family you want to use */
+        font-family: 'Montserrat', sans-serif;
+        /* Replace 'Your-Font-Family' with the actual font family you want to use */
         font-size: 15px;
     }
 
     /* Add this CSS rule to style the question numbers */
     h2::before {
-        content: "Q." attr(data-number) " "; /* Add a number and a period before each question */
+        content: "Q." attr(data-number) " ";
+        /* Add a number and a period before each question */
         font-weight: bold;
     }
 
     .header {
-        display: flex; /* Use flexbox for header layout */
-        align-items: center; /* Vertically center the content */
-        justify-content: space-between; /* Pushes items to the edges */
-        margin-bottom: 20px; /* Add space between header and questions */
+        display: flex;
+        /* Use flexbox for header layout */
+        align-items: center;
+        /* Vertically center the content */
+        justify-content: space-between;
+        /* Pushes items to the edges */
+        margin-bottom: 20px;
+        /* Add space between header and questions */
 
     }
 
@@ -70,12 +77,52 @@
         padding: 8px 10px;
         border-radius: 5px;
         border: 1px solid !important;
-        margin-left: auto; /* Shift the timer container to the right */
+        margin-left: auto;
+        /* Shift the timer container to the right */
+    }
+    .custom-submit-button {
+        background-color: black;
+        color: white;
+        padding: 10px 20px;
+        border: 1px solid white; /* Set the desired border color */
+        border-radius: 15px;
+        /* Add any other styles you want */
+        font-family: 'Montserrat', sans-serif; /* Replace 'Your-Font-Family' with the actual font family you want to use */
+        font-size: 15px;
+        display: block;
+        transition: all 0.3s ease-in-out; /* Add transition for hover effect */
     }
 
     /* Add this CSS rule to style the cursor on hover */
     .custom-submit-button:hover {
         cursor: pointer;
+        transform: scale(1.05); /* Add zoom effect on hover */
+        box-shadow: 0 0 10px grey; /* Add glow effect on hover */
+    }
+
+    .answer-input {
+        width: 50%;
+        padding: 10px;
+        border: none;
+        background-color: transparent;
+        /* Background color to match the page */
+        color: white;
+        /* Text color */
+        border-radius: 0px;
+        font-size: 16px;
+        outline: none;
+        border-bottom: 1px solid #ccc !important;
+        margin-left: 35px;
+        /* Shift the timer container to the right */
+    }
+
+    .answer-input::placeholder {
+        color: #ccc;
+        /* Placeholder text color */
+        font-family: 'Montserrat', sans-serif;
+        /* Replace with your desired font family */
+        font-size: 16px;
+        /* Adjust the font size if needed */
     }
 
 </style>
@@ -83,65 +130,85 @@
 <div class="container mt-4">
     <div class="quiz-container">
         <div class="header">
-            <h1 class="text-center mb-4 mt-0">Python Quiz 
-                <div class="timer-container text-center mt-3">
+            <h1 class="text-center mb-4 mt-0">Python Quiz
+                <div class="timer-container text-center mt-3 my-auto" style="justify-content: :space-between;">
                     <span id="minutes">00</span>:<span id="seconds">00</span>
                 </div>
             </h1>
         </div>
-        
+
         <form method="post" onsubmit="return validateForm()">
             {% csrf_token %}
             {% for question in questions %}
-                <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
-                <ul class="options">
-                    {% for answer in answers %}
-                        {% if answer.question == question %}
-                            <li>
-                                <label>
-                                    <input type="radio" name="question_{{ question.uuid }}" class="answer-radio" value="{{ answer.uuid }}">
-                                    {{ answer.answer }}
-                                </label>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
+            <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
+            {% if question.question_type == 'FIB' %}
+            <p><input type="text" name="question_1484f757-2fd2-45ba-8dae-998b17bbc90c_input" class="answer-input"
+                autocomplete="" placeholder="Enter your answer">
+                <p /><br>
+                {% else %}
+            <ul class="options">
+                {% for answer in answers %}
+                {% if answer.question == question %}
+                <li>
+                    <label>
+                        <input type="radio" name="question_{{ question.uuid }}" class="answer-radio"
+                            value="{{ answer.uuid }}">
+                        {{ answer.answer }}
+                    </label>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul><br>
+            {% endif %}
             {% endfor %}
-            <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
+            <div class="buttons" style="display:flex;width: 100%;">
+                <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
+                <form action="{% url 'index' %}"><button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" onclick="confirmQuit()">Back to Home</button></form>
+            </div>        
         </form>
     </div>
 </div>
 
 <script>
-    const submitBtn = document.querySelector('.btn-submit');
+    function startTimer() {
+        let minutes = {{ timer_minutes|default:5 }} || 5; // Set the quiz time in minutes
+        let seconds = {{ timer_seconds|default:0 }} || 0;
 
-    let minutes = 5; // Set the quiz time in minutes
-    let seconds = 0;
-
-    function updateTimer() {
-        if (seconds === 0) {
-            if (minutes === 0) {
-                clearInterval(timerInterval); // Stop the timer
-                alert("Time is up! Quiz is completed.");
-                // Redirect to the home page when the timer ends
-                window.location.href = "/index";
+        function updateTimer() {
+            if (seconds === 0) {
+                if (minutes === 0) {
+                    clearInterval(timerInterval); // Stop the timer
+                    alert("Time is up! Quiz is completed.");
+                    // Redirect to the home page when the timer ends
+                    window.location.href = "/index";
+                } else {
+                    minutes--;
+                    seconds = 59;
+                }
             } else {
-                minutes--;
-                seconds = 59;
+                seconds--;
             }
-        } else {
-            seconds--;
+
+            document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+            document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+            
         }
 
-        document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
-        document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+        updateTimer(); // Update the timer immediately
+        const timerInterval = setInterval(updateTimer, 1000); // Start the timer interval
     }
 
-    // Start the timer countdown
-    const timerInterval = setInterval(updateTimer, 1000);
+    // Check if there is a timer state in localStorage and continue the timer
+    const storedMinutes = localStorage.getItem('quizMinutes');
+    if (storedMinutes !== null) {
+        startTimer();
+    } else {
+        startTimer(); // Start the timer if no stored state is found
+    }
 
     function validateForm() {
         const answerRadios = document.querySelectorAll('.answer-radio');
+        const answerInputs = document.querySelectorAll('.answer-input');
         const answeredQuestions = new Set();
 
         answerRadios.forEach(radio => {
@@ -152,11 +219,36 @@
             }
         });
 
+        answerInputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                // Extract the question UUID from the input field's name attribute
+                const questionUuid = input.name.split('_')[1];
+                answeredQuestions.add(questionUuid);
+            }
+        });
+
         if (answeredQuestions.size !== {{ total_questions }}) {
-            alert("Quiz not completed. Please answer all questions.");
-            return false;
-        }
-        return true;
+        alert("Quiz not completed. Please answer all questions.");
+        return false;
     }
+
+    // Handle FIB questions separately
+    const fibQuestions = document.querySelectorAll('.answer-input');
+    fibQuestions.forEach(fibInput => {
+        const questionUuid = fibInput.name.split('_')[1];
+        const fibRadio = document.querySelector(`input[name="question_${questionUuid}"]:checked`);
+        if (!fibRadio) {
+            // If the corresponding radio button is not checked for an FIB question, create a hidden input with an empty value
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `question_${questionUuid}`;
+            hiddenInput.value = '';
+            document.querySelector('form').appendChild(hiddenInput);
+        }
+    });
+
+    return true;
+    }
+
 </script>
 {% endblock %}
