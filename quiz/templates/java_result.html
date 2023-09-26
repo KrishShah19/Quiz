@@ -20,7 +20,7 @@
     max-width: 800px; /* Limit container width */
     margin: 0 auto; /* Center the container horizontally */
     margin-top: 20px; /* Add top margin */
-    box-shadow: 0 0 5px cyan;;
+    box-shadow: 0 0 5px cyan;
   }
   @keyframes fadeIn {
     from {
@@ -132,7 +132,6 @@
           <td>
               {% if user_answer.question_text|lower not in user_answer.user_answer|lower %}
                   {{ user_answer.user_answer }}
-                  <!-- Add JavaScript to print the user's answer to the console -->
                   <script>
                       console.log("User's Answer (FIB Question): {{ user_answer.user_answer }}");
                   </script>
@@ -152,7 +151,6 @@
       {% endfor %}
   </tbody>
 </table>
-<!-- ... -->
 
 
   <div class="message {% if percentage < 35 %}failed{% else %}passed{% endif %}">
@@ -165,7 +163,6 @@
 
   <div class="button-container">
     <a href="{% url 'index' %}">Back to Home</a>
-    <!-- Add more buttons or links here as needed -->
   </div>
 </div>
 {% endblock %}

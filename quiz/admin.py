@@ -1,22 +1,3 @@
-# # admin.py
-
-# from django.contrib import admin
-# from django.contrib.auth import get_user_model
-# from .models import *
-
-# admin.site.register(User)
-# admin.site.register(Category)
-# admin.site.register(Answer)
-# admin.site.register(UserAnswer)
-# admin.site.register(QuizProgress)
-
-# class AnswerAdmin(admin.StackedInline):
-#     model = Answer
-
-# @admin.register(Question)
-# class QuestionAdmin(admin.ModelAdmin):
-#     inlines = [AnswerAdmin]
-
 from django.contrib import admin
 from nested_admin import NestedTabularInline, NestedModelAdmin
 from .models import *
@@ -58,7 +39,6 @@ class UserAnswerAdmin(admin.ModelAdmin):
 
     question_text.short_description = 'Question'
     selected_answer_text.short_description = 'Selected Answer'
-    
 
 @admin.register(QuizProgress)
 class QuizProgressAdmin(admin.ModelAdmin):

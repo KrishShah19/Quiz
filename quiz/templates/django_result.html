@@ -135,7 +135,6 @@
           <td>
               {% if user_answer.question_text|lower not in user_answer.user_answer|lower %}
                   {{ user_answer.user_answer }}
-                  <!-- Add JavaScript to print the user's answer to the console -->
                   <script>
                       console.log("User's Answer (FIB Question): {{ user_answer.user_answer }}");
                   </script>
@@ -169,7 +168,6 @@
 
   <div class="button-container">
     <a href="{% url 'index' %}">Back to Home</a>
-    <!-- Add more buttons or links here as needed -->
   </div>
 </div>
 {% endblock %}

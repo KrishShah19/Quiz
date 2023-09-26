@@ -8,7 +8,6 @@
         color: white;
     }
 
-    /* Add any additional CSS styles as needed */
     .quiz-container {
         max-width: 600px;
         margin: 0 auto;
@@ -35,7 +34,6 @@
         margin-bottom: 10px;
     }
 
-    /* Add this custom style in your CSS file */
     .custom-submit-button {
         background-color: black;
         color: white;
@@ -49,22 +47,16 @@
         margin: auto;
     }
 
-    /* Add this CSS rule to style the question numbers */
     h2::before {
         content: "Q." attr(data-number) " ";
-        /* Add a number and a period before each question */
         font-weight: bold;
     }
 
     .header {
         display: flex;
-        /* Use flexbox for header layout */
         align-items: center;
-        /* Vertically center the content */
         justify-content: space-between;
-        /* Pushes items to the edges */
         margin-bottom: 20px;
-        /* Add space between header and questions */
 
     }
 
@@ -77,10 +69,8 @@
         border-radius: 5px;
         border: 1px solid !important;
         margin-left: auto;
-        /* Shift the timer container to the right */
     }
 
-    /* Add this CSS rule to style the cursor on hover */
     .custom-submit-button:hover {
         cursor: pointer;
         transform: scale(1.05); /* Add zoom effect on hover */
@@ -92,24 +82,18 @@
         padding: 10px;
         border: none;
         background-color: transparent;
-        /* Background color to match the page */
         color: white;
-        /* Text color */
         border-radius: 0px;
         font-size: 16px;
         outline: none;
         border-bottom: 1px solid #ccc !important;
         margin-left: 35px;
-        /* Shift the timer container to the right */
     }
 
     .answer-input::placeholder {
         color: #ccc;
-        /* Placeholder text color */
         font-family: 'Montserrat', sans-serif;
-        /* Replace with your desired font family */
         font-size: 16px;
-        /* Adjust the font size if needed */
     }
 </style>
 
@@ -128,8 +112,7 @@
             {% for question in questions %}
             <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
             {% if question.question_type == 'FIB' %}
-            <p><input type="text" name="question_{{ question.uuid }}_input" class="answer-input"
-                    autocomplete="off" placeholder="Enter your answer">
+            <p><input type="text" name="question_{{ question.uuid }}_input" class="answer-input" autocomplete="off" placeholder="Enter your answer">
                 <p /><br>
                 {% else %}
             <ul class="options">
