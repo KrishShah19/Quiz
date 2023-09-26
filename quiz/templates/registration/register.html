@@ -87,6 +87,47 @@
             color: #3498db;
         }
     </style>
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get a reference to the button by its ID
+            var myButton = document.getElementById('register_button');
+
+
+            // Add a click event listener to the button
+            myButton.addEventListener('click', function () {
+                var userName = document.getElementById("id_username").value;
+                var emaIl = document.getElementById('id_email').value;
+                var passwOrd = document.getElementById('id_password1').value;
+                // Your code to handle the button click goes here
+                //alert('Button clicked!');
+                console.log(csrfToken, "ooooooooooooooooo")
+                const request_body = {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({
+                        username: userName,
+                        email: emaIl,
+                        password: passwOrd
+                    })
+                }
+                console.log(request_body)
+                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) // Use .json() to parse the JSON response
+                    .then(data => {
+                        console.log(data);
+                        // Handle the response data here
+                    })
+                    .catch((e) => {
+                        console.log(e.response.data)
+                    })
+                // You can replace the alert with your desired actions.
+
+                // Prevent the default form submission
+
+            });
+            event.preventDefault();
+        });
+    </script>
 </head>
 <body>
     <div class="container">

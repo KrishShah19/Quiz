@@ -432,14 +432,8 @@
     const roundedPercentage = Math.round(rawPercentage);
     progressPercentage.textContent = `${roundedPercentage}%`;
   
-    const quizCards = document.querySelectorAll('.card');
   
-    if ({{ request.session.quiz_progress_percentage }} >= 100) {
-      quizCards.forEach(card => {
-        card.style.pointerEvents = 'none'; // Disable click events on quiz cards
-        card.classList.add('disabled-card'); // Add a CSS class to style disabled cards
-      });
-    }
+    
   </script>
 </body>
 </html>
