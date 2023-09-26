@@ -16,11 +16,11 @@
     background-color: #222; /* Lighter background color for the container */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     animation: fadeIn 1s ease-in; /* Add fade-in animation */
     max-width: 800px; /* Limit container width */
     margin: 0 auto; /* Center the container horizontally */
     margin-top: 20px; /* Add top margin */
+    box-shadow: 0 0 5px cyan;;
   }
   @keyframes fadeIn {
     from {
@@ -97,23 +97,21 @@
     padding: 5px 7px;
     background-color: #343a40;
     border: 1px solid lightblue;
-    border-radius: 5px;
     color: white;
     text-decoration: none;
-    border-radius: 15px;
+    border-radius: 7px;
     display: inline-block;
     transition: transform 0.3s ease; /* Add transition for the scale animation */
   }
 
   .button-container a:hover {
-    background-color: #1e1e1e;
-    transform: scale(1.1); /* Scale the link on hover */
+    transform: scale(1.05); /* Scale the link on hover */
     box-shadow: 0 0 4px lightblue; /* Add a subtle glow effect on hover */
   }
 </style>
 
 <div class="container">
-  <h2>Java Quiz Results</h1>
+  <h2>JavaScript Quiz Results</h1>
 
   <h3>Your Score: {{ score }}</h3>
 

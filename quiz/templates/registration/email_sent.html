@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: lightslategray; /* Replace with your image URL */
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+        }
+
+        .container {
+            background-color: lightblue;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+            color: white;
+        }
+        .container:hover{
+            box-shadow: 0 0px 10px blue;
+
+        }
+
+        .icon {
+            font-size: 64px;
+            color: red;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: black;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #3579e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <i class="fas fa-envelope icon"></i> 
+        <h1>Password Reset Link Sent</h1>
+        <p>If you didn't receive it, please check your email or register yourself first.</p>
+        <a class="btn" href="/register/">Register</a>
+    </div>
+</body>
+</html>
+{% endblock %}

@@ -16,7 +16,7 @@
     background-color: #222; /* Lighter background color for the container */
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 5px cyan;
     animation: fadeIn 1s ease-in; /* Add fade-in animation */
     max-width: 800px; /* Limit container width */
     margin: 0 auto; /* Center the container horizontally */
@@ -99,10 +99,9 @@
     padding: 5px 7px;
     background-color: #343a40;
     border: 1px solid lightblue;
-    border-radius: 5px;
     color: white;
     text-decoration: none;
-    border-radius: 15px;
+    border-radius: 7px;
     display: inline-block;
     transition: transform 0.3s ease; /* Add transition for the scale animation */
   }
@@ -166,9 +165,6 @@
     {% endif %}
   </div>
 
-  <div class="message total-attempted">
-    You attempted a total of {{ total_questions_attempted }} questions, including {{ total_fib_questions }} FIB questions.
-  </div>
 
 
   <div class="button-container">

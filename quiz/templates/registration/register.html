@@ -1,137 +1,129 @@
 {% extends 'base.html' %}
 {% block content %}
 <!DOCTYPE html>
-<html>
-<title>Register</title>
-<style>
-    .custom-button {
-        background-color: #4CAF50;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .custom-button:hover {
-        border: 2px solid white;
-        /* Add border on hover */
-        transform: scale(1.05);
-        /* Add zoom effect on hover */
-    }
-</style>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <!-- Add your CSS and other common head elements here -->
-    <script>
-        const csrfToken = "{{ csrf_token }}";
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get a reference to the button by its ID
-            var myButton = document.getElementById('register_button');
-
-
-            // Add a click event listener to the button
-            myButton.addEventListener('click', function () {
-                var userName = document.getElementById("id_username").value;
-                var emaIl = document.getElementById('id_email').value;
-                var passwOrd = document.getElementById('id_password1').value;
-                // Your code to handle the button click goes here
-                //alert('Button clicked!');
-                console.log(csrfToken, "ooooooooooooooooo")
-                const request_body = {
-                    method: "POST",
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                    body: JSON.stringify({
-                        username: userName,
-                        email: emaIl,
-                        password: passwOrd
-                    })
-                }
-                console.log(request_body)
-                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) // Use .json() to parse the JSON response
-                    .then(data => {
-                        console.log(data);
-                        // Handle the response data here
-                    })
-                    .catch((e) => {
-                        console.log(e.response.data)
-                    })
-                // You can replace the alert with your desired actions.
-
-                // Prevent the default form submission
-
-            });
-            event.preventDefault();
-        });
-    </script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha384-oqpzjwAF7RfOfz1r6V73afZbyxvbMpgyTLj2KtPXA1T+1zA/BktSTqpf6iPug61j" crossorigin="anonymous">
+    <style>
+        body {
+            background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .registration-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(30px);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .registration-card:hover {
+            box-shadow: 0 0px 10px lightblue;
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        .registration-card h2 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .registration-form {
+            max-width: 400px;
+            margin: auto;
+        }
+        .custom-input {
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid #3498db;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+            outline: none;
+            font-size: 18px;
+        }
+        .custom-input::placeholder {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            color: #777;
+        }
+        .custom-button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+        .custom-button:hover {
+            background-color: #2980b9;
+        }
+        .helptext {
+            font-size: 14px;
+            color: #777;
+        }
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 10px;
+            color: #3498db;
+        }
+    </style>
 </head>
-
 <body>
     <div class="container">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-
         <section class="text-center">
-            <!-- Background image -->
-            <div class="p-5 bg-image"
-                style="background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg'); height: 300px;">
-            </div>
-            <!-- Background image -->
-
-            <div class="card mx-4 mx-md-5 shadow-5-strong"
-                style="margin-top: -100px; background: hsla(0, 0%, 100%, 0.8); backdrop-filter: blur(30px);">
-                <div class="card-body py-5 px-md-5">
-                    <div class="row d-flex justify-content-center">
-                        <div class="col-lg-8">
-                            <h2 class="fw-bold mb-5">Sign up now</h2>
-                            <form method="post" action="{% url 'verify_otp' %}">
-                                {% csrf_token %}
-                                <p>
-                                    <label for="id_username">Username:</label>
-                                    <input type="text" id="id_username" maxlength="150" autofocus required>
-                                </p>
-
-
-                                <p>
-                                    <label for="id_email">Email address:</label>
-                                    <input type="email" maxlength="254" id="id_email" required>
-                                    {% if email_exists %}
-                                <p style="color: red;">Email already exists. Please use a different email address.</p>
-                                {% endif %}
-                                </p>
-
-
-                                <p>
-                                    <label for="id_password1">Password:</label>
-                                    {% comment %} <input type="password" name="password1" autocomplete="new-password"
-                                        required id="id_password1"> {% endcomment %}
-                                    <input type="password" required id="id_password1"
-                                        pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" title="Your password must meet the following requirements:
-                                        - Must contain at least 8 characters
-                                        - Must contain at least one letter, one number, and one special character">
-                                </p>
-
-                                <span class="helptext custom-font">
-                                    <ul>
-                                        <li>Your password can’t be too similar to your other personal information.
-                                        </li>
-                                        <li>Your password must contain at least 8 characters.</li>
-                                        <li>Your password can’t be a commonly used password.</li>
-                                        <li>Your password can’t be entirely numeric.</li>
-                                    </ul>
-                                </span>
-                                </p>
-                                <p>
-                                    <button id="register_button" type="submit"
-                                        class="btn btn-primary btn-block mb-4 custom-button">Send OTP</button>
-                                </p> 
-                            </form>
-                        </div>
+            <div class="registration-card">
+                <h2>Sign up now</h2>
+                <form class="registration-form" method="post" action="{% url 'verify_otp' %}">
+                    {% csrf_token %}
+                    <div class="form-group input-icon">
+                        <input type="text" id="id_username" class="custom-input" maxlength="150" placeholder="Username" autofocus required>
+                        <i class="fas fa-user"></i>
                     </div>
-                </div>
+                    <div class="form-group input-icon">
+                        <input type="email" id="id_email" class="custom-input" maxlength="254" placeholder="Email address" required>
+                        {% if email_exists %}
+                        <p class="error-message">Email already exists. Please use a different email address.</p>
+                        {% endif %}
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="form-group input-icon">
+                        <input type="password" id="id_password1" class="custom-input" placeholder="Password" required>
+                        <span class="helptext custom-font">Your password must meet the following requirements:
+                            <ul>
+                                <li>Must contain at least 8 characters</li>
+                                <li>Must contain at least one letter, one number, and one special character</li>
+                            </ul>
+                        </span>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="form-group">
+                        <p><button id="register_button" type="submit" class="custom-button">Send OTP</button></p>
+                    </div>
+                </form>
             </div>
         </section>
     </div>
-
 </body>
-
 </html>
+
 {% endblock %}

@@ -2,7 +2,6 @@ import random
 from django.db import models
 
 # Create your models here.
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from .manager import UserManager
@@ -13,6 +12,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True)
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=4  , null=True, blank=True)
+    completed_quizzes=models.PositiveIntegerField(default=0)
    
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']

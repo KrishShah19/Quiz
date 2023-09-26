@@ -18,6 +18,7 @@
         background-color: #1e1e1e;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         position: center !important;
+        box-shadow:0 0 5px violet;
     }
 
     .question {
@@ -35,20 +36,7 @@
     }
 
     /* Add this custom style in your CSS file */
-    .custom-submit-button {
-        background-color: black;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border: 1px solid white;
-        /* Set the desired border color */
-        border-radius: 15px;
-        /* Add any other styles you want */
-        margin-right: auto;
-        font-family: 'Montserrat', sans-serif;
-        /* Replace 'Your-Font-Family' with the actual font family you want to use */
-        font-size: 15px;
-    }
+    
 
     /* Add this CSS rule to style the question numbers */
     h2::before {
@@ -86,18 +74,18 @@
         padding: 10px 20px;
         border: 1px solid white; /* Set the desired border color */
         border-radius: 15px;
-        /* Add any other styles you want */
         font-family: 'Montserrat', sans-serif; /* Replace 'Your-Font-Family' with the actual font family you want to use */
         font-size: 15px;
         display: block;
         transition: all 0.3s ease-in-out; /* Add transition for hover effect */
+        margin: auto;
     }
 
     /* Add this CSS rule to style the cursor on hover */
     .custom-submit-button:hover {
         cursor: pointer;
         transform: scale(1.05); /* Add zoom effect on hover */
-        box-shadow: 0 0 10px grey; /* Add glow effect on hover */
+        box-shadow: 0 0 5px violet; /* Add glow effect on hover */
     }
 
     .answer-input {
@@ -130,7 +118,7 @@
 <div class="container mt-4">
     <div class="quiz-container">
         <div class="header">
-            <h1 class="text-center mb-4 mt-0">Java Quiz
+            <h1 class="text-center mb-4 mt-0">JavaScript Quiz
                 <div class="timer-container text-center mt-3">
                     <span id="minutes">00</span>:<span id="seconds">00</span>
                 </div>
@@ -143,7 +131,7 @@
             <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
             {% if question.question_type == 'FIB' %}
             <p><input type="text" name="question_1484f757-2fd2-45ba-8dae-998b17bbc90c_input" class="answer-input"
-                autocomplete="" placeholder="Enter your answer">
+                autocomplete="off" placeholder="Enter your answer">
                 <p /><br>
                 {% else %}
             <ul class="options">
@@ -163,7 +151,6 @@
             {% endfor %}
             <div style="display:flex; justify-content: space-between;width: 100%;">
                 <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
-                <form action="{% url 'index' %}"><button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" onclick="confirmQuit()">Back to Home</button></form>
             </div>        
         </form>
     </div>

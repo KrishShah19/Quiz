@@ -18,6 +18,7 @@
         background-color: #1e1e1e;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         position: center !important;
+        box-shadow: 0 0 5px green;
     }
 
     .question {
@@ -33,23 +34,6 @@
         display: block;
         margin-bottom: 10px;
     }
-
-    /* Add this custom style in your CSS file */
-    .custom-submit-button {
-        background-color: black;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border: 1px solid white;
-        /* Set the desired border color */
-        border-radius: 15px;
-        /* Add any other styles you want */
-        margin-right: auto;
-        font-family: 'Montserrat', sans-serif;
-        /* Replace 'Your-Font-Family' with the actual font family you want to use */
-        font-size: 15px;
-    }
-
     /* Add this CSS rule to style the question numbers */
     h2::before {
         content: "Q." attr(data-number) " ";
@@ -59,14 +43,6 @@
 
     .header {
         display: flex;
-        /* Use flexbox for header layout */
-        align-items: center;
-        /* Vertically center the content */
-        justify-content: space-between;
-        /* Pushes items to the edges */
-        margin-bottom: 20px;
-        /* Add space between header and questions */
-
     }
 
     .timer-container {
@@ -82,6 +58,7 @@
     }
     .custom-submit-button {
         background-color: black;
+        margin: auto;
         color: white;
         padding: 10px 20px;
         border: 1px solid white; /* Set the desired border color */
@@ -97,7 +74,7 @@
     .custom-submit-button:hover {
         cursor: pointer;
         transform: scale(1.05); /* Add zoom effect on hover */
-        box-shadow: 0 0 10px grey; /* Add glow effect on hover */
+        box-shadow: 0 0 7px green; /* Add glow effect on hover */
     }
 
     .answer-input {
@@ -117,56 +94,49 @@
     }
 
     .answer-input::placeholder {
-        color: #ccc;
-        /* Placeholder text color */
+        color: white;
         font-family: 'Montserrat', sans-serif;
-        /* Replace with your desired font family */
         font-size: 16px;
-        /* Adjust the font size if needed */
     }
 
 </style>
+<div class="quiz-container ">
+    <div class="header d-flex justify-content-center">
+        <h1 class="mb-4 mt-0 title">Python Quiz
+            <div class="timer-container mt-3" style="justify-content: :space-between;">
+                <span id="minutes">00</span>:<span id="seconds">00</span>
+            </div>
+        </h1>
+    </div>
 
-<div class="container mt-4">
-    <div class="quiz-container">
-        <div class="header">
-            <h1 class="text-center mb-4 mt-0">Python Quiz
-                <div class="timer-container text-center mt-3 my-auto" style="justify-content: :space-between;">
-                    <span id="minutes">00</span>:<span id="seconds">00</span>
-                </div>
-            </h1>
-        </div>
-
-        <form method="post" onsubmit="return validateForm()">
-            {% csrf_token %}
-            {% for question in questions %}
-            <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
-            {% if question.question_type == 'FIB' %}
-            <p><input type="text" name="question_1484f757-2fd2-45ba-8dae-998b17bbc90c_input" class="answer-input"
-                autocomplete="" placeholder="Enter your answer">
-                <p /><br>
-                {% else %}
-            <ul class="options">
-                {% for answer in answers %}
-                {% if answer.question == question %}
-                <li>
-                    <label>
-                        <input type="radio" name="question_{{ question.uuid }}" class="answer-radio"
-                            value="{{ answer.uuid }}">
-                        {{ answer.answer }}
-                    </label>
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul><br>
+    <form method="post" onsubmit="return validateForm()">
+        {% csrf_token %}
+        {% for question in questions %}
+        <h2 class="question" data-number="{{ forloop.counter }}">{{ question.question }}</h2>
+        {% if question.question_type == 'FIB' %}
+        <p><input type="text" name="question_1484f757-2fd2-45ba-8dae-998b17bbc90c_input" class="answer-input"
+            autocomplete="" placeholder="Enter your answer">
+            <p /><br>
+            {% else %}
+        <ul class="options">
+            {% for answer in answers %}
+            {% if answer.question == question %}
+            <li>
+                <label>
+                    <input type="radio" name="question_{{ question.uuid }}" class="answer-radio"
+                        value="{{ answer.uuid }}">
+                    {{ answer.answer }}
+                </label>
+            </li>
             {% endif %}
             {% endfor %}
-            <div class="buttons" style="display:flex;width: 100%;">
-                <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
-                <form action="{% url 'index' %}"><button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" onclick="confirmQuit()">Back to Home</button></form>
-            </div>        
-        </form>
-    </div>
+        </ul><br>
+        {% endif %}
+        {% endfor %}
+        <div class="buttons" style="display:flex;width: 100%;">
+            <button class="btn custom-submit-button btn-lg px-5 mx-auto d-block" type="submit">Submit</button>
+        </div>        
+    </form>
 </div>
 
 <script>

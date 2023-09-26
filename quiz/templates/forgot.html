@@ -13,7 +13,6 @@
     <style>
         /* Custom styles for your page */
         body {
-            font-family: 'Arial', sans-serif;
             background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg');
             background-size: cover;
             background-repeat: no-repeat;
@@ -28,15 +27,11 @@
 
         .card {
             background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(100px);
+            
         }
-
         .card-title {
-            font-size: 28px;
-        }
-
-        .form-outline {
-            margin-bottom: 2rem;
+            font-size: 24px;
         }
 
         .btn-primary {
@@ -65,7 +60,7 @@
 </head>
 <body>
 <section class="text-center">
-    <div class="card mx-4 mx-md-5 shadow-lg animate__animated animate__fadeInDown">
+    <div class="card mx-4 mx-md-5 shadow-lg" style="card:hover:0 0 10px black;">
         <div class="card-body py-5 px-md-5">
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-5">
@@ -73,8 +68,8 @@
                     <form method="post" action="{% url 'password_reset' %}">
                         {% csrf_token %}
                         <div class="form-outline">
-                            <input type="email" id="form3Example3" class="form-control" name="email" required />
-                            <p><label class="form-label" for="form3Example3">Email address</label><p>
+                            <input type="email" id="form3Example3" class="form-control" name="email" required autocomplete="off" />
+                            <p><label class="form-label mt-2" for="form3Example3">Email address</label><p>
                         </div>
                         <p><button type="submit" class="btn btn-primary btn-block mb-4">Send OTP</button></p>
                     </form>
