@@ -334,7 +334,7 @@
         <h4 class="fw-bold mb-2 text-white">Welcome {{ request.user }}!</h4>
         <div class="progress">
           <div class="progress-bar" role="progressbar" style="width: {{ request.session.quiz_progress_percentage }}%;" aria-valuenow="{{ request.session.quiz_progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
-            <span id="roundedPercentage" style="font-size:17px;font-weight:bold; color:black;">{{ request.session.quiz_progress_percentage|floatformat:0 }}%</span>
+            <span id="roundedPercentage" style="font-size:15px;font-weight:bold; color:black;">{{ request.session.quiz_progress_percentage|floatformat:0 }}%</span>
           </div>
         </div>
       </div>
@@ -425,15 +425,14 @@
       quizContainer.scrollTo(0, 0);
     });
   
-    const progressPercentage = document.getElementById('roundedPercentage');
-    const rawPercentage = parseFloat(progressPercentage.textContent);
-    
-    // Round the percentage based on the decimal part
-    const roundedPercentage = Math.round(rawPercentage);
-    progressPercentage.textContent = `${roundedPercentage}%`;
-  
-  
-    
+    if (completedQuizzes === 0) {
+      progressPercentage.textContent = '0%';
+    } 
+    else {
+      const rawPercentage = (completedQuizzes / quizCount) * 100;
+      const roundedPercentage = Math.round(rawPercentage);
+      progressPercentage.textContent = `${roundedPercentage}%`;
+    }
   </script>
 </body>
 </html>

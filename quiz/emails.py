@@ -7,7 +7,7 @@ import traceback
 def send_otp(email):
     subject = 'Your Account Verification Email'
     otp = random.randint(1000,9999)
-    message = f'Your otp is {otp}'
+    message = f'Your Account Verification code is {otp}'
     email_from = settings.EMAIL_HOST_USER
 
     print(f"Sending OTP to: {email}")

@@ -20,6 +20,9 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import status
 from .serializer import UserSerializer, VerifyAccount
 from django.db.models import F
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
+from django.views import View
+from django.views.decorators.cache import never_cache
 
 logger = logging.getLogger(__name__)
 
@@ -133,10 +136,12 @@ class LoginAPI(APIView):
             data = request.data
             username = data.get('username')
             password = data.get('password')
+            print(f"^^^^^^Received username: {username} and password: {password}^^^^^^^^^^^^^")
 
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                print("Login successful")
                 return Response({
                     'status': 200,
                     'message': 'Login successful.',
@@ -149,6 +154,7 @@ class LoginAPI(APIView):
                     'data': {}
                 })
         except Exception as e:
+            print(f"Login error: {str(e)}")
             return Response({
                 'status': 400,
                 'message': 'Something went wrong.',
@@ -188,6 +194,7 @@ class IndexView(View):
     template_name = 'index.html'
 
     @method_decorator(login_required)
+    @method_decorator(never_cache)
     def get(self, request):
         """
         Display the main index page for authenticated users.
@@ -225,6 +232,7 @@ class ForgotView(PasswordResetView):
                 request, 'Failed to send OTP. Please try again later.')
             return render(request, self.template_name, {'error_message': 'Failed to send OTP. Please try again later.'})
 
+
 class VerifyOTPView(PasswordResetView):
     """
     VerifyOTPView: Handles OTP verification via web interface.
@@ -249,6 +257,7 @@ class VerifyOTPView(PasswordResetView):
         if user:
             user.is_verified = True
             user.save()
+            login(request, user)
             messages.success(request, 'OTP verified successfully!')
             return redirect('index')
         else:
@@ -311,6 +320,7 @@ class QuizViewBase(View):
             'total_fib_questions': total_fib_questions,
             'start_quiz': start_quiz,
             'progress_percentage': progress_percentage,
+            'completed_quiz': completed_quizzes,
         }
         return render(request, self.template_name, context)
 
@@ -524,10 +534,12 @@ class DjangoResultView(View):
             'progress_percentage': progress_percentage,
         })
 
-class LogoutView(View):
+class LogoutView(DjangoLogoutView):
     """
     LogoutView: Handles user logout.
     """
-    def get(self, request):
-        logout(request)
-        return redirect('/')
+    next_page='/'
+    def dispatch(self, request, *args, **kwargs):
+        # Expire the session on logout
+        request.session.flush()
+        return super().dispatch(request, *args, **kwargs)
