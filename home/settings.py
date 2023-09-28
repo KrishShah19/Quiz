@@ -139,5 +139,9 @@ EMAIL_HOST_PASSWORD = 'onuvovnigdodciqr'
 if DEBUG:
     CACHE_MIDDLEWARE_SECONDS = 0
 
-
+LOGIN_REDIRECT_URL = '/index/'  # Replace with the desired URL
+LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/'
+
+SESSION_COOKIE_NAME = 'admin_sessionid'  # For admin
+

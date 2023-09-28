@@ -13,7 +13,12 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=4, null=True, blank=True)
     completed_quizzes = models.PositiveIntegerField(default=0)
-
+    # ROLE_CHOICES = [
+    #     ('user', 'User'),
+    #     ('admin', 'Admin'),
+    # ]
+    # role = models.CharField(max_length=50, choices=ROLE_CHOICES)
+    
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 

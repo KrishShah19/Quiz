@@ -52,7 +52,7 @@
         }
         .custom-input::placeholder {
             font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             color: #777;
         }
         .custom-button {
@@ -90,7 +90,6 @@
     <script>
         const csrfToken = "{{ csrf_token }}";
         document.addEventListener('DOMContentLoaded', function () {
-            // Get a reference to the button by its ID
             var myButton = document.getElementById('register_button');
 
 
@@ -99,7 +98,6 @@
                 var userName = document.getElementById("id_username").value;
                 var emaIl = document.getElementById('id_email').value;
                 var passwOrd = document.getElementById('id_password1').value;
-                // Your code to handle the button click goes here
                 //alert('Button clicked!');
                 console.log(csrfToken, "ooooooooooooooooo")
                 const request_body = {
@@ -112,21 +110,34 @@
                     })
                 }
                 console.log(request_body)
-                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) // Use .json() to parse the JSON response
+                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) 
                     .then(data => {
                         console.log(data);
-                        // Handle the response data here
                     })
                     .catch((e) => {
                         console.log(e.response.data)
                     })
-                // You can replace the alert with your desired actions.
-
-                // Prevent the default form submission
-
             });
             event.preventDefault();
         });
+        function validateForm() {
+            const emailInput = document.getElementById('id_email');
+            const emailValue = emailInput.value.trim(); // Remove leading/trailing spaces
+        
+            // Regular expression for email validation
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        
+            if (!emailRegex.test(emailValue)) {
+                // Display an error message for invalid email
+                const errorElement = document.querySelector('.error-message');
+                errorElement.innerHTML = 'Invalid email address. Please enter a valid email.';
+                emailInput.classList.add('is-invalid');
+                return false; // Prevent form submission
+            }
+        
+            return true; // Allow form submission if email is valid
+        }
+        
     </script>
 </head>
 <body>
@@ -137,14 +148,11 @@
                 <form class="registration-form" method="post" action="{% url 'verify_otp' %}">
                     {% csrf_token %}
                     <div class="form-group input-icon">
-                        <input type="text" id="id_username" class="custom-input" maxlength="150" placeholder="Username" autofocus required>
+                        <input type="text" id="id_username" class="custom-input" maxlength="150" placeholder="Username" autofocus required autocomplete="off">
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="form-group input-icon">
-                        <input type="email" id="id_email" class="custom-input" maxlength="254" placeholder="Email address" required>
-                        {% if email_exists %}
-                        <p class="error-message">Email already exists. Please use a different email address.</p>
-                        {% endif %}
+                        <input type="email" id="id_email" class="custom-input" maxlength="254" placeholder="Email address" required autocomplete="off">
                         <i class="fas fa-envelope"></i>
                     </div>
                     <div class="form-group input-icon">

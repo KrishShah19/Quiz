@@ -34,14 +34,15 @@ urlpatterns = [
     path('api/register/',RegisterAPI.as_view(), name='registerapi'),
     path('python_quiz/', PythonQuiz.as_view(), name='python_quiz'),
     path('django_quiz/', DjangoQuizView.as_view(), name='django_quiz'),
-    path('java_quiz/', JavaQuiz.as_view(), name='java_quiz'),
+    path('javascript_quiz/', JavaScriptQuiz.as_view(), name='javascript_quiz'),
 
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
     path('email_sent/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('java_quiz/result/', JavaResultView.as_view(), name='java_result'),
+    path('javascript_quiz/result/', JavaScriptResultView.as_view(), name='javascript_result'),
     path('django_quiz/result/', DjangoResultView.as_view(), name='django_result'),
     path('python_quiz/result/', PythonResultView.as_view(), name='python_result'),
-
+    # path('user/questions/', UserQuestionView.as_view(), name='user_questions'),
+    # path('admin/questions/', AdminQuestionView.as_view(), name='admin_questions'),  
 ]

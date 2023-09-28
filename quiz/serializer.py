@@ -9,9 +9,9 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Check if the email is already associated with an existing user.
         """
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('Email already exists.')
-        return value
+        # if User.objects.filter(email=value).exists():
+        #     raise serializers.ValidationError('Email already exists.')
+        # return value
 
 class VerifyAccount(serializers.Serializer):
     email=serializers.EmailField()

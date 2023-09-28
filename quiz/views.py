@@ -274,10 +274,23 @@ class RegisterView(View):
         """
         Display the registration form.
         """
-        email = request.GET.get('email')
-        email_already_exists = User.objects.filter(email=email).exists()
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        data = request.POST
+        email = data.get('email')
 
-        return render(request, self.template_name, {'email_exists': email_already_exists})
+        # Check if the email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists. Please use a different email address.')
+            return render(request, 'registration/register.html')
+
+        # The rest of your registration code
+        # Generate OTP, send email, etc.
+
+        # Redirect to the OTP verification page
+        return redirect('verify_otp')
+        
 
 class QuizViewBase(View):
     """
@@ -290,6 +303,10 @@ class QuizViewBase(View):
         Display the quiz page.
         """
         category = self.get_category()
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+        
         questions = list(Question.objects.filter(category=category))
         answers = list(Answer.objects.all())
 
@@ -329,6 +346,10 @@ class QuizViewBase(View):
         Handle quiz submission.
         """
         category = self.get_category()
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+        
         questions = list(Question.objects.filter(category=category))
         answers = list(Answer.objects.all())
 
@@ -401,6 +422,9 @@ class QuizViewBase(View):
         total_quizzes = total_categories
         if completed_quizzes < total_quizzes:
             User.objects.filter(username=request.user.username).update(completed_quizzes=F('completed_quizzes') + 1)
+        
+        request.session[f'{self.quiz_type}_completed'] = True
+
         if total_categories > 0:
             progress_percentage = (completed_quizzes / total_categories) * 100.0
         else:
@@ -426,6 +450,28 @@ class PythonQuiz(QuizViewBase):
     @property
     def quiz_type(self):
         return 'python'
+    
+    def get(self, request):
+        """
+        Display the Python quiz page.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+
+        return super().get(request)
+
+    def post(self, request):
+        """
+        Handle Python quiz submission.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+
+        return super().post(request)
 
 class PythonResultView(View):
     """
@@ -454,34 +500,56 @@ class PythonResultView(View):
             'progress_percentage': progress_percentage,
         })
 
-class JavaQuiz(QuizViewBase):
+class JavaScriptQuiz(QuizViewBase):
     """
     JavaScriptQuizView: Handles the JavaScript quiz page.
     """
-    template_name = 'java_quiz.html'
+    template_name = 'javascript_quiz.html'
 
     def get_category(self):
         return Category.objects.get(category_name='JS')
 
     @property
     def quiz_type(self):
-        return 'java'
+        return 'javascript'
+    
+    def get(self, request):
+        """
+        Display the Python quiz page.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
 
-class JavaResultView(View):
+        return super().get(request)
+
+    def post(self, request):
+        """
+        Handle Python quiz submission.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+
+        return super().post(request)
+
+class JavaScriptResultView(View):
     """
     JavaScriptResultView: Handles the JavaScript quiz result page.
     """
-    template_name = 'java_result.html'
+    template_name = 'javascript_result.html'
 
     def get(self, request):
         """
         Display the JavaScript quiz result.
         """
-        score = request.session.get('java_score', '0/0')
-        user_answers = request.session.get('java_user_answers', [])
+        score = request.session.get('javascript_score', '0/0')
+        user_answers = request.session.get('javascript_user_answers', [])
         total_questions_attempted = len(user_answers)
-        total_fib_questions = request.session.get('java_total_fib_questions', 0)
-        percentage = request.session.get('java_percentage', 0)
+        total_fib_questions = request.session.get('javascript_total_fib_questions', 0)
+        percentage = request.session.get('javascript_percentage', 0)
         progress_percentage = request.session.get(
             'quiz_progress_percentage', 0)
 
@@ -506,6 +574,28 @@ class DjangoQuizView(QuizViewBase):
     @property
     def quiz_type(self):
         return 'django'
+    
+    def get(self, request):
+        """
+        Display the Python quiz page.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+
+        return super().get(request)
+
+    def post(self, request):
+        """
+        Handle Python quiz submission.
+        """
+        # Check if the user has already completed the Python quiz
+        if request.session.get(f'{self.quiz_type}_completed'):
+            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            return redirect(f'{self.quiz_type}_result')
+
+        return super().post(request)
 
 class DjangoResultView(View):
     """
@@ -540,6 +630,38 @@ class LogoutView(DjangoLogoutView):
     """
     next_page='/'
     def dispatch(self, request, *args, **kwargs):
-        # Expire the session on logout
         request.session.flush()
         return super().dispatch(request, *args, **kwargs)
+
+
+# from django.contrib.auth.decorators import login_required, user_passes_test
+# from django.http import HttpResponseForbidden
+# from django.utils.decorators import method_decorator
+
+# # Mixin for regular users
+# class UserAccessMixin:
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+
+# # Mixin for admins
+# class AdminAccessMixin:
+#     @method_decorator(login_required)
+#     @method_decorator(user_passes_test(lambda u: u.role == 'admin'))
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+
+# from django.views import View
+# from django.http import HttpResponse
+
+# # View for regular users
+# class UserQuestionView(UserAccessMixin, View):
+#     def get(self, request):
+#         # Display questions for regular users
+#         return HttpResponse("This is for regular users.")
+
+# # View for admins
+# class AdminQuestionView(AdminAccessMixin, View):
+#     def get(self, request):
+#         # Display questions for admins
+#         return HttpResponse("This is for admins.")
