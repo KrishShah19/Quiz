@@ -135,6 +135,7 @@ class SetPasswordView(View):
                         # Set the new password
                         new_password = form.validated_data['new_password']
                         user.set_password(new_password)
+                        user.is_verified=True
                         user.save()
 
                         # Log in the user

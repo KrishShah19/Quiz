@@ -339,7 +339,12 @@
         </div>
       </div>
       <p class="quiz-selection-text">Select the Quiz of Your Choice!</p>
-      <a href="{% url 'add_quiz' %}" class="btn btn-primary">Add Quiz</a><br><br>
+      
+      {% if user.is_superuser %}
+      <div class="text-center">
+        <a href="{% url 'add_quiz' %}" class="btn btn-primary">Add Quiz</a><br><br>
+      </div>
+      {% endif %}
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">  
         <div class="col">
           <div class="card shadow-lg rounded">

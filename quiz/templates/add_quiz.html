@@ -218,7 +218,11 @@
         margin-top: 10px;
     }   
 </style>
+{% load custom_template_tags %}
 
+<!-- Show admin-specific content only to admins -->
+{% if request.user|has_admin_role %}
+    <p>This content is visible only to admins.</p>
 <div class="container">
     <h2>Add Quiz</h2>
 
@@ -282,6 +286,8 @@
         </div>
     </div>
 </div>
+{% endif %}
+
 <script>
     // JavaScript to show/hide the correct answer and answer fields based on question type selection
     const questionsDiv = document.getElementById('questions');

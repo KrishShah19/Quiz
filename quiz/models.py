@@ -10,15 +10,14 @@ from django.utils import timezone
 
 class User(AbstractUser):
     email=models.EmailField(unique=True)
-    username = models.CharField(max_length=30, unique=True)
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=4, null=True, blank=True)
     completed_quizzes = models.PositiveIntegerField(default=0)
-    # ROLE_CHOICES = [
-    #     ('user', 'User'),
-    #     ('admin', 'Admin'),
-    # ]
-    # role = models.CharField(max_length=50, choices=ROLE_CHOICES)
+    ROLE_CHOICES = [
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    ]
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='user')
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['']
