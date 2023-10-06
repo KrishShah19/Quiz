@@ -130,10 +130,10 @@
 </div>
 
 <script>
-    function startTimer() {
-        let minutes = {{ timer_minutes|default:5 }} || 5; // Set the quiz time in minutes
-        let seconds = {{ timer_seconds|default:0 }} || 0;
-
+    function startTimer(startMinutes, startSeconds) {
+        let minutes = startMinutes || {{ timer_minutes|default:5 }} || 5; // Set the quiz time in minutes
+        let seconds = startSeconds || {{ timer_seconds|default:0 }} || 0;
+    
         function updateTimer() {
             if (seconds === 0) {
                 if (minutes === 0) {
@@ -147,22 +147,30 @@
             } else {
                 seconds--;
             }
-
+    
             document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
             document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
-            
+    
+            // Save the timer state in local storage
+            localStorage.setItem('quizMinutes', minutes);
+            localStorage.setItem('quizSeconds', seconds);
         }
-
+    
         updateTimer(); // Update the timer immediately
         const timerInterval = setInterval(updateTimer, 1000); // Start the timer interval
     }
+      
 
     const storedMinutes = localStorage.getItem('quizMinutes');
-    if (storedMinutes !== null) {
-        startTimer();
+    const storedSeconds = localStorage.getItem('quizSeconds');
+
+    if (storedMinutes !== null && storedSeconds !== null) {
+        // Start the timer with the stored state
+        startTimer(parseInt(storedMinutes), parseInt(storedSeconds));
     } else {
         startTimer(); // Start the timer if no stored state is found
     }
+
 
     function validateForm() {
         const answerRadios = document.querySelectorAll('.answer-radio');

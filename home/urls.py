@@ -26,18 +26,17 @@ urlpatterns = [
     path('', LoginView.as_view(), name='login'),
     path('index/', login_required(IndexView.as_view()), name='index'),
     path('register/', RegisterView.as_view(), name='register'),
-    path('forgot/', ForgotView.as_view(), name='forgot'),
-    path('api/verify_otp/', VerifyOTP.as_view(), name='verify_otpapi'),
+    # path('forgot/', ForgotView.as_view(), name='forgot'),
     # path('verify_otp/<str:email>/', VerifyOTPView.as_view(), name='verify_otp'),
     path('verify_otp/', VerifyOTPView.as_view(), name='verify_otp'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('api/register/',RegisterAPI.as_view(), name='registerapi'),
+    # path('api/register/',RegisterAPI.as_view(), name='registerapi'),
     path('python_quiz/', PythonQuiz.as_view(), name='python_quiz'),
     path('django_quiz/', DjangoQuizView.as_view(), name='django_quiz'),
     path('javascript_quiz/', JavaScriptQuiz.as_view(), name='javascript_quiz'),
 
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('email_sent/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('email_sent/', EmailSentView.as_view(), name='email_sent'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('javascript_quiz/result/', JavaScriptResultView.as_view(), name='javascript_result'),
@@ -45,4 +44,12 @@ urlpatterns = [
     path('python_quiz/result/', PythonResultView.as_view(), name='python_result'),
     # path('user/questions/', UserQuestionView.as_view(), name='user_questions'),
     # path('admin/questions/', AdminQuestionView.as_view(), name='admin_questions'),  
+    # path('email_register/', email_register, name='email_register'),  # Process registration and send email
+    path('api/send_email/', RegisterAPI.as_view(), name='send_emails'),
+
+    path('set_password/<str:uidb64>/<str:token>/', SetPasswordView.as_view(), name='set_password'),
+    path('password_reset_invalid/', PasswordResetInvalid.as_view(), name='password_reset_invalid'),
+    path('send_email/', SendEmailView.as_view(), name='send_email'),
+    path('add_quiz/', AddQuizView.as_view(), name='add_quiz'),
+
 ]

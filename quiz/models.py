@@ -9,6 +9,7 @@ import uuid
 from django.utils import timezone
 
 class User(AbstractUser):
+    email=models.EmailField(unique=True)
     username = models.CharField(max_length=30, unique=True)
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=4, null=True, blank=True)
@@ -19,14 +20,13 @@ class User(AbstractUser):
     # ]
     # role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['']
 
     objects = UserManager()
 
     def __str__(self):
-        return self.username
-
+        return self.email
 
 class BaseModel(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -66,8 +66,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    question = models.ForeignKey(
-    Question, related_name='question_answer', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='question_answer', on_delete=models.CASCADE)
     answer = models.CharField(max_length=100)
     # chosen_option = models.ForeignKey(Option, on_delete=models.CASCADE, null=True, blank=True)
     is_correct = models.BooleanField(default=False)
@@ -79,8 +78,7 @@ class Answer(BaseModel):
 class UserAnswer(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_answer = models.ForeignKey(
-    Answer, on_delete=models.CASCADE, null=True)
+    selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
     user_input = models.TextField(blank=True, null=True)
     is_correct = models.BooleanField(default=False)
     marks_obtained = models.IntegerField(default=0)
@@ -100,3 +98,15 @@ class QuizProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.category.category_name}"
+
+# class Quiz(models.Model):
+#     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+#     questions = models.ManyToManyField(Question)
+#     answers = models.ManyToManyField(Answer)
+#     question_type = models.CharField(max_length=10, choices=[('MCQ', 'Multiple Choice'), ('FIB', 'Fill in the Blank')])
+#     correct_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+#     score = models.PositiveIntegerField()
+#     user = models.ManyToManyField(User)
+
+#     def __str__(self):
+#         return f"Quiz for {self.category.category_name}"

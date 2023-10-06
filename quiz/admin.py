@@ -19,7 +19,7 @@ class CategoryAdmin(NestedModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_verified')
+    list_display = ( 'email', 'is_verified')
     list_filter = ('is_verified',)
     search_fields = ('username', 'email')
 

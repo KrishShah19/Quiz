@@ -39,7 +39,7 @@
             max-width: 400px;
             margin: auto;
         }
-        .custom-input {
+        .email-input {
             background-color: transparent;
             border: none;
             border-bottom: 2px solid #3498db;
@@ -50,7 +50,7 @@
             outline: none;
             font-size: 18px;
         }
-        .custom-input::placeholder {
+        .email-input::placeholder {
             font-family: 'Montserrat', sans-serif;
             font-size: 16px;
             color: #777;
@@ -86,57 +86,69 @@
             right: 10px;
             color: #3498db;
         }
-    </style>
-    <script>
-        const csrfToken = "{{ csrf_token }}";
-        document.addEventListener('DOMContentLoaded', function () {
-            var myButton = document.getElementById('register_button');
-
-
-            // Add a click event listener to the button
-            myButton.addEventListener('click', function () {
-                var userName = document.getElementById("id_username").value;
-                var emaIl = document.getElementById('id_email').value;
-                var passwOrd = document.getElementById('id_password1').value;
-                //alert('Button clicked!');
-                console.log(csrfToken, "ooooooooooooooooo")
-                const request_body = {
-                    method: "POST",
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                    body: JSON.stringify({
-                        username: userName,
-                        email: emaIl,
-                        password: passwOrd
-                    })
-                }
-                console.log(request_body)
-                const response = fetch('http://127.0.0.1:8000/api/register/', request_body).then(response => response.json()) 
-                    .then(data => {
-                        console.log(data);
-                    })
-                    .catch((e) => {
-                        console.log(e.response.data)
-                    })
-            });
-            event.preventDefault();
-        });
-        function validateForm() {
-            const emailInput = document.getElementById('id_email');
-            const emailValue = emailInput.value.trim(); // Remove leading/trailing spaces
-        
-            // Regular expression for email validation
-            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        
-            if (!emailRegex.test(emailValue)) {
-                // Display an error message for invalid email
-                const errorElement = document.querySelector('.error-message');
-                errorElement.innerHTML = 'Invalid email address. Please enter a valid email.';
-                emailInput.classList.add('is-invalid');
-                return false; // Prevent form submission
-            }
-        
-            return true; // Allow form submission if email is valid
+        .success-message{
+            color:green;
+            
         }
+    </style> 
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get form and input elements
+            const registrationForm = document.getElementById("registration-form");
+            const emailInput = document.getElementById("email-input");
+            console.log("Email input:", emailInput);
+            system.out.println("Email entered:",emailInput);
+
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            const successElement = document.querySelector('.success-message');
+            const errorElement = document.querySelector('.error-message');
+
+            // Add an event listener for form submission
+            registrationForm.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                successElement.innerHTML = '';
+                errorElement.innerHTML = '';
+        
+                // Get the email entered by the user
+                const email = emailInput.value;
+        
+                // Log the email to the console for debugging
+                console.log("Email entered:", email);
+        
+                // Send an AJAX request to your SendEmailView
+                // Make sure to replace 'your-api-endpoint' with the actual URL
+                fetch('http://127.0.0.1:8000/send_email/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ email: email }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server
+                    if (data.success) {
+                        // Log success message for debugging
+                        console.log("Email sent successfully!");
+                        successElement.innerHTML = 'Email sent successfully. Check your inbox for further instructions.';
+                        // You can also redirect the user or show a success message here
+                    } else {
+                        // Log any error messages for debugging
+                        console.error("Error sending email:", data.error_message);
+                        errorElement.innerHTML = 'Failed to send email';
+                        // Handle the error, such as displaying an error message to the user
+                    }
+                })
+                .catch(error => {
+                    // Handle any network or other errors
+                    console.error("AJAX request error:", error);
+                });
+            });
+        });
         
     </script>
 </head>
@@ -144,35 +156,19 @@
     <div class="container">
         <section class="text-center">
             <div class="registration-card">
-                <h2>Sign up now</h2>
-                <form class="registration-form" method="post" action="{% url 'verify_otp' %}">
+                <h2>Sign Up</h2>
+                <form class="registration-form" id="registration-form" action="{% url 'send_email' %}" method="POST">
                     {% csrf_token %}
-                    <div class="form-group input-icon">
-                        <input type="text" id="id_username" class="custom-input" maxlength="150" placeholder="Username" autofocus required autocomplete="off">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="form-group input-icon">
-                        <input type="email" id="id_email" class="custom-input" maxlength="254" placeholder="Email address" required autocomplete="off">
+                    <div class="form-group input-icon mb-2">
+                        <input type="email" name="email" id="email-input" class="email-input" placeholder="Email" required autocomplete="off">
                         <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="form-group input-icon">
-                        <p>
-                            <input type="password" required id="id_password1"
-                                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" title="Your password must meet the following requirements:
-                                - Must contain at least 8 characters
-                                - Must contain at least one letter, one number, and one special character" class="custom-input" placeholder="Password">
-                        </p>
-                        <span class="helptext custom-font">Your password must meet the following requirements:
-                            <ul>
-                                <li>Must contain at least 8 characters</li>
-                                <li>Must contain at least one letter, one number, and one special character</li>
-                            </ul>
-                        </span>
-                        <i class="fas fa-lock"></i>
-                    </div>
                     <div class="form-group">
-                        <p><button id="register_button" type="submit" class="custom-button">Send OTP</button></p>
+                        <p><button id="send_mail_button" type="submit" class="custom-button">Send Mail</button>
+                        </p>
                     </div>
+                    <div class="success-message"></div>
+                    <div class="error-message"></div> <!-- Error message container -->
                 </form>
             </div>
         </section>

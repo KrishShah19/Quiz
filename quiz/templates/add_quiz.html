@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% block content %}
+<title>Add Quiz</title>
+<style>
+    body {
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-color: #343a40 !important;
+        color: white;
+        font-family: 'Montserrat', sans-serif;
+        margin-bottom:20px;
+        margin-top:20px;
+    }
+
+    .container {
+        max-width: 700px;
+        height: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #343a40;
+        border-radius: 10px;
+        background-color: #1e1e1e;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        position: center !important;
+    }
+
+    h2 {
+        color: #ffffff;
+    }
+
+    label {
+        color: #ffffff;
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"] {
+        background-color: #333;
+        color: #ffffff;
+        border: 1px solid #666;
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        margin-bottom: 10px;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+    select {
+        background-color: #333;
+        color: #ffffff;
+        border: 1px solid #666;
+        border-radius: 5px;
+        padding: 5px;
+        width: 100%;
+        margin-bottom: 10px;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+    /* Style for the option elements within the select */
+    select option {
+        background-color: #333;
+        color: #ffffff !important;
+    }
+
+    /* Add a blue border when the select is focused */
+    select:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+        border-color: #007bff;
+    }
+
+    /* Beautify the submit button */
+    input[type="submit"] {
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    /* Add a subtle box shadow on hover for input fields */
+    input[type="text"]:hover,
+    input[type="number"]:hover,
+    select:hover {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    #add_question {
+        background-color: transparent;
+        color: #ffffff;
+        border: 1px white solid;
+        border-radius: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        font-family: 'Montserrat';
+    }
+
+    #add_question:hover {
+        transform: scale(1.05); /* Add a slight scale effect on hover */
+        box-shadow: 0 0 5px silver; /* Add a subtle box shadow on hover */
+    }
+
+    #add_question::before {
+        content: "+"; /* Add a plus sign before the button text */
+        margin-right: 5px;
+        font-size: 15px;
+    }
+    
+    .add_quiz{
+        background-color: transparent;
+        outline:white;
+        color: #ffffff;
+        border: 1px solid white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        font-family: 'Montserrat';
+        font-size:15px;
+    }
+    .add_quiz:hover {
+        transform: scale(1.05); /* Add a slight scale effect on hover */
+        box-shadow: 0 0 10px silver; /* Add a subtle box shadow on hover */
+    }
+    .reset-form{
+        background-color: transparent;
+        outline:white;
+        color: #ffffff;
+        border: 1px solid white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        font-family: 'Montserrat';
+        font-size:15px;
+        margin-left:auto;
+    }
+    .reset-form:hover {
+        transform: scale(1.05); /* Add a slight scale effect on hover */
+        box-shadow: 0 0 10px silver; /* Add a subtle box shadow on hover */
+    }
+    /* Add animations for the question fields */
+    .question {
+        animation: slideIn 0.5s ease-in-out;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .remove-question {
+        position: absolute;
+        top: 0;
+        right: 0;
+        color: #ff0000;
+        cursor: pointer;
+        transition: color 0.3s ease-in-out;
+    }
+
+    .remove-question:hover {
+        color: #dd0000;
+    }
+
+    @keyframes slideIn {
+        0% {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Style for the correct answer radios */
+    .correct-answer-radio {
+        margin-right: 5px;
+    }
+
+    /* Question number styling */
+    .question-number {
+        font-weight: bold;
+        margin-right: 5px;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #333;
+        color: #ffffff;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .modal-buttons {
+        margin-top: 10px;
+    }   
+</style>
+
+<div class="container">
+    <h2>Add Quiz</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="category">Category:</label><br><br>
+        <input type="text" name="category" id="category"><br><br>
+
+        <div id="questions">
+            <div class="question">
+                <span class="question-number">Question 1:</span><br><br>
+                <label for="question"></label>
+                <input type="text" name="question" class="question-field"><span class="remove-question" onclick="removeQuestion(this)">✖</span><br>
+
+                <label for="question_type">Question Type:</label><br><br>
+                <select name="question_type" class="question-type">
+                    <option value="FIB" selected>Fill in the Blank</option>
+                    <option value="MCQ">Multiple Choice</option>
+                </select><br><br>
+
+                <label for="score">Score:</label><br><br>
+                <input type="number" name="score" class="score"><br><br>
+
+                <div class="answers_mcq" style="display: none;">
+                    <label for="answer">Answers:</label><br>
+                    <!-- Input fields for answers -->
+                    <input type="text" name="answer1" class="answer"><br>
+                    <input type="text" name="answer2" class="answer"><br>
+                    <input type="text" name="answer3" class="answer"><br>
+                    <input type="text" name="answer4" class="answer"><br>
+                    <!-- Add more answer input fields as needed -->
+                </div>
+
+                <div class="answers_fib">
+                    <label for="correct_answer">Correct Answer:</label><br><br>
+                    <input type="text" name="correct_answer" class="correct-answer"><br>
+                </div>
+
+                <div class="correct_answer_mcq" style="display: none;">
+                    <label>Mark Correct Answer:</label><br>
+                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 1<br>
+                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 2<br>
+                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 3<br>
+                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 4<br>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="add_question" id="add_question">Add Question</button><br>
+
+        <input type="button" value="+ Add Quiz" class="add_quiz"><button type="button" class="reset-form" id="reset-form">Reset Form</button><br>
+
+    </form>
+</div>
+<div class="modal" id="confirmationModal">
+    <div class="modal-content">
+        <p>Are you sure you want to leave this page? Your unsaved changes will be lost.</p>
+        <div class="modal-buttons">
+            <button id="confirmLeave">Yes</button>
+            <button id="cancelLeave">No</button>
+        </div>
+    </div>
+</div>
+<script>
+    // JavaScript to show/hide the correct answer and answer fields based on question type selection
+    const questionsDiv = document.getElementById('questions');
+    const addQuestionButton = document.getElementById('add_question');
+    let questionCount = 1;
+
+    function removeQuestion(button) {
+        const questionToRemove = button.parentElement;
+        questionsDiv.removeChild(questionToRemove);
+        questionCount--;
+        updateQuestionNumbers();
+    }
+    // Function to update question numbers
+    function updateQuestionNumbers() {
+        const questions = document.querySelectorAll('.question');
+        questions.forEach((question, index) => {
+            const questionNumberElement = question.querySelector('.question-number');
+            questionNumberElement.textContent = `Question ${index + 1}:`;
+        });
+    }
+     // Handle form data persistence using localStorage
+    function saveFormData() {
+        const formData = {};
+        const formFields = document.querySelectorAll('input, select');
+        formFields.forEach(field => {
+            formData[field.name] = field.value;
+        });
+        localStorage.setItem('formData', JSON.stringify(formData));
+    }
+
+    // Restore form data from localStorage
+    function restoreFormData() {
+        const savedData = localStorage.getItem('formData');
+        if (savedData) {
+            const formData = JSON.parse(savedData);
+            const formFields = document.querySelectorAll('input, select');
+            formFields.forEach(field => {
+                if (formData.hasOwnProperty(field.name)) {
+                    field.value = formData[field.name];
+                }
+            });
+        }
+    }
+
+    addQuestionButton.addEventListener('click', function () {
+        const newQuestion = document.querySelector('.question').cloneNode(true);
+        newQuestion.querySelectorAll('input, select').forEach(element => {
+            element.value = '';
+        });
+        questionsDiv.appendChild(newQuestion);
+        questionCount++;
+        newQuestion.querySelector('.question-number').textContent = `Question ${questionCount}:`;
+        newQuestion.querySelector('.question-field');
+        newQuestion.querySelector('.remove-question').style.display = 'inline-block';
+
+        // Save form data when adding a new question
+        saveFormData();
+
+        updateQuestionNumbers();
+    });
+
+    questionsDiv.addEventListener('change', function (event) {
+        const questionTypeSelect = event.target.closest('.question').querySelector('.question-type');
+        const answersMCQ = event.target.closest('.question').querySelector('.answers_mcq');
+        const answersFIB = event.target.closest('.question').querySelector('.answers_fib');
+        const correctAnswerMCQ = event.target.closest('.question').querySelector('.correct_answer_mcq');
+        const answerInputs = event.target.closest('.question').querySelectorAll('.answer');
+        const correctAnswerRadioInputs = event.target.closest('.question').querySelectorAll('.correct-answer-radio');
+
+        if (questionTypeSelect.value === 'MCQ') {
+            answersMCQ.style.display = 'block';
+            answersFIB.style.display = 'none';
+            correctAnswerMCQ.style.display = 'block';
+            answerInputs.forEach(input => {
+                input.setAttribute('name', `answer${questionCount}_${input.getAttribute('name').slice(-1)}`);
+            });
+            correctAnswerRadioInputs.forEach(input => {
+                input.setAttribute('name', `correct_answer_${questionCount}`);
+            });
+        } else if (questionTypeSelect.value === 'FIB') {
+            answersMCQ.style.display = 'none';
+            answersFIB.style.display = 'block';
+            correctAnswerMCQ.style.display = 'none';
+            answerInputs.forEach(input => {
+                input.setAttribute('name', `correct_answer_${questionCount}`);
+            });
+            correctAnswerRadioInputs.forEach(input => {
+                input.removeAttribute('name');
+            });
+        } else {
+            answersMCQ.style.display = 'none';
+            answersFIB.style.display = 'none';
+            correctAnswerMCQ.style.display = 'none';
+        }
+        saveFormData();
+    });
+
+    // Restore form data when the page loads
+    window.addEventListener('load', restoreFormData);
+
+    // Confirmation modal logic
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmLeaveButton = document.getElementById('confirmLeave');
+    const cancelLeaveButton = document.getElementById('cancelLeave');
+
+    function showConfirmationModal() {
+        // Show the confirmation modal
+        confirmationModal.style.display = 'flex';
+    }
+
+    function hideConfirmationModal() {
+        // Close the modal
+        confirmationModal.style.display = 'none';
+    }
+
+    // Handle navigation within the same website using the popstate event
+    window.addEventListener('popstate', function (event) {
+        if (localStorage.getItem('formData')) {
+            // Show the confirmation modal when navigating away from the page
+            showConfirmationModal();
+        }
+    });
+
+    // Handle the beforeunload event when the user tries to leave the page
+    window.addEventListener('beforeunload', function (event) {
+        if (localStorage.getItem('formData')) {
+            // Prompt a confirmation message when there are unsaved changes
+            event.returnValue = 'You have unsaved changes. Are you sure you want to leave this page?';
+        }
+    });
+
+    confirmLeaveButton.addEventListener('click', function () {
+        // Clear the form data and close the modal
+        localStorage.removeItem('formData');
+        hideConfirmationModal();
+
+        // Navigate away from the page (e.g., go back)
+        window.history.back();
+    });
+
+    cancelLeaveButton.addEventListener('click', function () {
+        // Close the modal without leaving the page
+        hideConfirmationModal();
+    });
+    // JavaScript to reset the form
+    const resetFormButton = document.getElementById('reset-form');
+    resetFormButton.addEventListener('click', function () {
+        const form = document.querySelector('form');
+        form.reset();
+
+        // Additionally, you may want to clear the saved form data in localStorage
+        localStorage.removeItem('formData');
+
+        // Reset the question count and remove all added questions
+        questionCount = 1;
+        const addedQuestions = document.querySelectorAll('.question');
+        addedQuestions.forEach(function (question, index) {
+            if (index > 0) {
+                questionsDiv.removeChild(question);
+            }
+        });
+
+        // Update question numbers
+        updateQuestionNumbers();
+    });
+    // Function to clear the form data when "Add Quiz" is clicked
+    const addQuizButton = document.querySelector('.add_quiz');
+    addQuizButton.addEventListener('click', function () {
+        const formFields = document.querySelectorAll('input, select');
+        formFields.forEach(field => {
+            field.value = '';
+        });
+
+        // Clear the saved form data in localStorage
+        localStorage.removeItem('formData');
+    });
+</script>
+{% endblock %}

@@ -1,49 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="static\style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <style>
-        .card:hover{
-            box-shadow:0 0 15px lavender;
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #222, #444);
+            animation: backgroundAnimation 10s ease infinite alternate;
+        }
+
+        @keyframes backgroundAnimation {
+            0% {
+                background: linear-gradient(to bottom, #222, #444);
+            }
+            100% {
+                background: linear-gradient(to bottom, #444, #222);
+            }
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            width: 350px;
+            text-align: center;
+            transform: scale(1);
+            transition: transform 0.5s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px silver;
+        }
+
+        .form-control {
+            background-color: transparent;
+            border: none;
+            padding: 5px;
+            width: 100%;
+            margin-bottom: 15px;
+            outline: none;
+            font-size: 50px;
+            text-align: left; /* Align text to the left */
+            display: flex; /* Added */
+            align-items: center; /* Added */
+            position: relative; /* Added */
+        }
+
+        .form-control input {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+            caret-color: #3498db; /* Adjust caret color to match underline color */
+            flex: 1; /* Added */
+            color: white;
+            font-size:15px;
+        }
+        .form-control::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%; /* Start from the middle */
+            transform: translateX(-50%) scaleX(0); /* Initially hidden and centered */
+            width: 0;
+            height: 2px;
+            background-color: red;
+            transition: transform 0.3s ease, width 0.3s ease; /* Transition width and transform */
+        }
+
+        .form-control:hover::before,
+        .form-control input:focus +::before {
+            transform: translateX(-50%) scaleX(1); /* Show and center the underline */
+            width: 100%; /* Expand to both sides */
+        }
+
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        h2 {
+            color: #fff;
+        }
+
+        .icon {
+            font-size: 20px;
+            color: white;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
-    <section class="gradient-custom">
-        <div class="container py-5 h-100" >
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                    <div class="card bg-dark text-white" style="border-radius: 1rem; margin-bottom:75px;">
-                        <div class="card-body p-5 text-center">
-                            <div class="mb-md-5 mt-md-4 pb-5">
-                                <h2 class="fw-bold mb-10 text-uppercase">Login</h2>
-                                <p class="text-white-50 mb-3">Please enter your username and password!</p>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <div class="form-outline form-white mb-4">
-                                        <input type="text" id="username" class="form-control form-control-lg mb-2" name="username" placeholder="Enter Username" autocomplete="off"required/>
-                                        <label class="form-label" for="username">Username</label>
-                                    </div>
-
-                                    <div class="form-outline form-white mb-4">
-                                        <input type="password" id="password" class="form-control form-control-lg mb-2" name="password" placeholder="Enter Password" required/>
-                                        <label class="form-label" for="password">Password</label>
-                                    </div>
-
-                                    <p class="small mb-4 pb-lg-2"><a class="text-white-50" href="{% url 'forgot' %}">Forgot password?</a></p>
-                                    <button class="btn btn-outline-light btn-lg px-500 mb-0" type="submit">Login</button>
-                                </form>
-                            </div>
-                            <div>
-                                <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="text-white-50 fw-bold">Sign Up</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="container">
+        <h2 class="fw-bold mb-4 text-uppercase">Login</h2>
+        <p class="text-white-50 mb-4">Please enter your email and password!</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-control">
+                <i class="icon fas fa-envelope"></i>
+                <input type="text" id="email" class="form-control-lg" name="email" placeholder="Enter Email" autocomplete="off" required/>
             </div>
-        </div>
-    </section>
+            <div class="form-control">
+                <i class="icon fas fa-lock"></i>
+                <input type="password" id="password" class="form-control-lg" name="password" placeholder="Enter Password" required/>
+            </div>
+            <p><button class="btn btn-outline-light btn-lg px-500 mb-0" type="submit">Login</button></p>
+        </form>
+        <p class="mb-0 mt-3 text-white">Don't have an account? <a href="{% url 'register' %}" class="text-white-50 fw-bold">Sign Up</a></p>
+    </div>
 </body>
 </html>
+{% endblock %}

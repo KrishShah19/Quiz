@@ -15,27 +15,159 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
 from .serializer import UserSerializer
-from .emails import send_otp
-from django.contrib.auth.hashers import make_password 
 from rest_framework import status
-from .serializer import UserSerializer, VerifyAccount
+from .serializer import UserSerializer
 from django.db.models import F
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.views import View
 from django.views.decorators.cache import never_cache
+from django.core.exceptions import ObjectDoesNotExist
+from .serializer import SetPasswordSerializer  # Import the SetPasswordSerializer
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.template.loader import render_to_string
+from django.http import HttpResponse, JsonResponse
+import logging
+from django.template import loader
+from django.core.mail import EmailMultiAlternatives
 
+User = get_user_model()
+logger = logging.getLogger('django')
+
+class SendEmailView(View):
+    def post(self, request):
+        if request.method == 'POST':
+            email = request.POST.get('email')
+            print("Email received: ", email)
+            print("POST CALLED^^^^^^^^^^^^^^^^^")
+            try:
+                # Check if a user with the provided email exists
+                user, created = User.objects.get_or_create(email=email)
+
+                # Generate a confirmation token
+                token = default_token_generator.make_token(user)
+                print("^^^^^^^^^^^^TOKEN^^^^^^:", token)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+                # Build the confirmation URL
+                confirmation_url = settings.FRONTEND_URL + f'/set_password/{uid}/{token}/'
+                print("^^^^^^^^^^^^", confirmation_url)
+
+                # Render the email template
+                subject = 'Confirm Your Registration'
+                email_template = loader.get_template('registration/email_link_template.html')
+                email_context = {
+                    'user': user,
+                    'confirmation_url': confirmation_url,
+                }
+                email_content = email_template.render(email_context)
+
+                # Create an EmailMultiAlternatives object for HTML email
+                msg = EmailMultiAlternatives(subject, email_content, settings.EMAIL_HOST_USER, [user.email])
+                msg.attach_alternative(email_content, "text/html")
+
+                # Send the email
+                msg.send()
+
+                print(f"Email sent successfully to {email}")
+
+                return HttpResponseRedirect(reverse('email_sent'))
+            except Exception as e:
+                print(f"Error sending email: {e}")
+                logger.error(f"Error sending email: {e}")
+                return JsonResponse({'success': False, 'error_message': str(e)})
+
+            
+class EmailSentView(View):
+    template_name = 'email_sent.html'  # Update with your actual template name
+
+    def get(self, request):
+        return render(request, self.template_name)
+    
+class SetPasswordView(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.filter(pk=uid).first()
+
+            # Initialize a variable to track whether token verification was successful
+            token_verified = False
+
+            # If a user with the provided UID exists, proceed with setting the password
+            if user:
+                # Verify the token
+                if default_token_generator.check_token(user, token):
+                    token_verified = True
+                    # Display the password set form
+                    print("Token checked successfully")  # Add this line
+                    return render(request, 'registration/set_password.html', {'user': user})
+
+            # Log the result of token verification
+            if token_verified:
+                print("Token checked successfully")
+            else:
+                print("Token verification failed")
+
+            # If no user with the provided UID exists or token check fails, handle it accordingly (e.g., show an error)
+            return redirect('password_reset_invalid')
+
+        except (TypeError, ValueError, OverflowError):
+            user = None
+
+        return redirect('password_reset_invalid')
+
+    def post(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.filter(pk=uid).first()
+
+            # Initialize a variable to track whether token verification was successful
+            token_verified = False
+
+            # If a user with the provided UID exists, proceed with setting the password
+            if user:
+                # Verify the token
+                if default_token_generator.check_token(user, token):
+                    token_verified = True
+                    # Create the SetPasswordSerializer instance and validate data
+                    form = SetPasswordSerializer(data=request.POST)
+                    if form.is_valid():
+                        # Set the new password
+                        new_password = form.validated_data['new_password']
+                        user.set_password(new_password)
+                        user.save()
+
+                        # Log in the user
+                        login(request, user)
+
+                        # Redirect to a success page or any other desired page
+                        return redirect('login')
+
+            # Log the result of token verification
+            if token_verified:
+                print("Token checked successfully")
+            else:
+                print("Token verification failed")
+
+            # If no user with the provided UID exists or token check fails, handle it accordingly (e.g., show an error)
+            return redirect('password_reset_invalid')
+
+        except Exception as e:
+            user = None
+            print(f"Error during token verification: {e}")
+            # Log the error
+            logger.error(f"Error during token verification: {e}")
+
+        return redirect('password_reset_invalid')
+
+
+class PasswordResetInvalid(View):
+    def get(self, request):
+        return render(request, 'password_reset_invalid.html')        
 logger = logging.getLogger(__name__)
 
 class RegisterAPI(APIView):
-    """
-    RegisterAPI: Handles user registration via API.
-
-    - POST: Register a new user.
-    """
     def post(self, request):
-        """
-        Register a new user via API.
-        """
         try:
             data = request.data
             email = data.get('email')
@@ -48,71 +180,42 @@ class RegisterAPI(APIView):
                     'data': {'email_exists': True}
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+            # Create the user object but don't save it to the database yet
+            user = User(email=email)
+            
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
-                user = serializer.save()
-                password = make_password(data['password'])
-                user = serializer.save(password=password)
-                send_otp(user.email)
+                # Generate a confirmation token
+                token = default_token_generator.make_token(user)
+
+                # Create a unique token for the user
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+                # Build the confirmation URL
+                confirmation_url = settings.FRONTEND_URL + f'/set_password/{uid}/{token}/'
+
+                # Create a subject and message for the email
+                subject = 'Confirm Your Registration'
+                message = render_to_string('registration/email_link_template.html', {
+                    'user': user,
+                    'confirmation_url': confirmation_url,
+                })
+
+                # Send the email
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+                # Save the user to the database
+                user.save()
+
                 return Response({
                     'status': 200,
-                    'message': 'Registered successfully. Check email for OTP verification.',
+                    'message': 'Registration successful. Check email to set the password.',
                     'data': serializer.data
                 })
-            else:
-                return Response({
-                    'status': 400,
-                    'message': 'Something went wrong with data validation.',
-                    'data': serializer.errors
-                })
-        except Exception as e:
+
             return Response({
                 'status': 400,
-                'message': 'Something went wrong.',
-                'data': str(e)
-            })
-
-class VerifyOTP(APIView):
-    """
-    VerifyOTP: Handles OTP verification via API.
-
-    - POST: Verify the OTP for a user's account.
-    """
-    def post(self, request):
-        """
-        Verify OTP for a user's account via API.
-        """
-        try:
-            data = request.data
-            serializer = VerifyAccount(data=data)
-            if serializer.is_valid():
-                email = serializer.data['email']
-                otp = serializer.data['otp']
-
-                user = User.objects.filter(email=email).first()
-                if user is None:
-                    return Response({
-                        'status': 400,
-                        'message': 'Invalid email.',
-                        'data': 'invalid_email'
-                    })
-                if user.otp != otp:
-                    return Response({
-                        'status': 400,
-                        'message': 'Invalid OTP.',
-                        'data': 'invalid_otp'
-                    })
-
-                user.is_verified = True
-                user.save()
-                return Response({
-                    'status': 200,
-                    'message': 'Account is verified.',
-                    'data': {}
-                })
-            return Response({
-                'status': 400,
-                'message': 'Something went wrong.',
+                'message': 'Something went wrong with data validation.',
                 'data': serializer.errors
             })
         except Exception as e:
@@ -121,45 +224,39 @@ class VerifyOTP(APIView):
                 'message': 'Something went wrong.',
                 'data': str(e)
             })
+        
 
-class LoginAPI(APIView):
+class RegisterView(View):
     """
-    LoginAPI: Handles user login via API.
+    RegisterView: Handles user registration via web interface.
+    """
+    template_name = 'registration/register.html'
 
-    - POST: Log in a user.
-    """
+    def get(self, request):
+        """
+        Display the registration form.
+        """
+        return render(request, self.template_name)
+    
     def post(self, request):
-        """
-        Log in a user via API.
-        """
-        try:
-            data = request.data
-            username = data.get('username')
-            password = data.get('password')
-            print(f"^^^^^^Received username: {username} and password: {password}^^^^^^^^^^^^^")
+        data = request.POST
+        email = data.get('email')
+        
+        if not email:
+        # Handle the case where the email is empty
+            return HttpResponse("Email must be provided.", status=400)
+        existing_user = User.objects.filter(email=email).first()
+        if existing_user:
+            return HttpResponse("Email already exists. Please use a different email address.", status=400)
+        # Create a new user without checking for email existence
+        user = User.objects.create_user(email=email)
+        
+        # Log in the newly created user
+        login(request, user)
 
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                print("Login successful")
-                return Response({
-                    'status': 200,
-                    'message': 'Login successful.',
-                    'data': {}
-                })
-            else:
-                return Response({
-                    'status': 400,
-                    'message': 'Invalid credentials.',
-                    'data': {}
-                })
-        except Exception as e:
-            print(f"Login error: {str(e)}")
-            return Response({
-                'status': 400,
-                'message': 'Something went wrong.',
-                'data': str(e)
-            })
+        # Redirect to the OTP verification page or any other desired page
+        return redirect('login')
+
 
 class LoginView(View):
     """
@@ -177,15 +274,16 @@ class LoginView(View):
         """
         Handle user login via web interface.
         """
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('index')
         else:
             return render(request, self.template_name, {'error': 'Invalid credentials'})
+
 
 class IndexView(View):
     """
@@ -204,33 +302,86 @@ class IndexView(View):
         else:
             return redirect('/')
 
-class ForgotView(PasswordResetView):
-    """
-    ForgotView: Handles password reset via web interface.
-    """
-    template_name = 'forgot.html'
+
+class AddQuizView(View):
+    template_name = 'add_quiz.html'  # The template where you have the form
 
     def get(self, request):
-        """
-        Display the password reset form.
-        """
-        return render(request, self.template_name)
+        # Retrieve categories and answers from the database
+        categories = Category.objects.all()
+        answers = Answer.objects.all()
+        context = {
+            'categories': categories,
+            'answers': answers,
+        }
+        return render(request, self.template_name, context)
 
     def post(self, request):
-        """
-        Handle password reset via web interface.
-        """
-        data = request.POST
-        email = data.get('email')
-        if send_otp(email):
-            messages.success(request, 'OTP has been sent to your email.')
-            verify_otp_url = reverse('verify_otp', args=[email])
-            logger.info(f"OTP sent to {email}")
-            return HttpResponseRedirect(verify_otp_url)
-        else:
-            messages.error(
-                request, 'Failed to send OTP. Please try again later.')
-            return render(request, self.template_name, {'error_message': 'Failed to send OTP. Please try again later.'})
+        # Handle the form submission
+        category_id = request.POST.get('category')
+        question_text = request.POST.get('question')
+        question_type = request.POST.get('question_type')
+        score = request.POST.get('score')
+
+        # Create a new question
+        question = Question.objects.create(
+            category_id=category_id,
+            text=question_text,
+            question_type=question_type,
+            score=score
+        )
+
+        if question_type == 'MCQ':
+            # For Multiple Choice Questions
+            answer_ids = [int(request.POST.get(f'answer{i}')) for i in range(1, 6)]  # Adjust the range as needed
+
+            for answer_id in answer_ids:
+                answer = Answer.objects.get(id=answer_id)
+                question.answers.add(answer)
+
+            correct_answer_ids = request.POST.getlist('correct_answer')
+            for correct_id in correct_answer_ids:
+                correct_answer = Answer.objects.get(id=correct_id)
+                question.correct_answers.add(correct_answer)
+
+        elif question_type == 'FIB':
+            # For Fill in the Blank Questions
+            correct_answer_text = request.POST.get('correct_answer')
+
+            # Create and set the correct answer
+            correct_answer = Answer.objects.create(answer=correct_answer_text)
+            question.correct_answers.add(correct_answer)
+
+        # Redirect to a success page or wherever you'd like
+        return redirect('index')  # Adjust the URL name
+    
+# class ForgotView(PasswordResetView):
+#     """
+#     ForgotView: Handles password reset via web interface.
+#     """
+#     template_name = 'forgot.html'
+
+#     def get(self, request):
+#         """
+#         Display the password reset form.
+#         """
+#         return render(request, self.template_name)
+
+#     def post(self, request):
+#         """
+#         Handle password reset via web interface.
+#         """
+#         data = request.POST
+#         email = data.get('email')
+#         if send_otp(email):
+#             messages.success(request, 'OTP has been sent to your email.')
+#             verify_otp_url = reverse('verify_otp', args=[email])
+#             logger.info(f"OTP sent to {email}")
+#             return HttpResponseRedirect(verify_otp_url)
+#         else:
+#             messages.error(
+#                 request, 'Failed to send OTP. Please try again later.')
+#             return render(request, self.template_name, {'error_message': 'Failed to send OTP. Please try again later.'})
 
 
 class VerifyOTPView(PasswordResetView):
@@ -264,33 +415,6 @@ class VerifyOTPView(PasswordResetView):
             messages.error(request, 'Incorrect OTP. Please try again.')
             return render(request, self.template_name)
 
-class RegisterView(View):
-    """
-    RegisterView: Handles user registration via web interface.
-    """
-    template_name = 'registration/register.html'
-
-    def get(self, request):
-        """
-        Display the registration form.
-        """
-        return render(request, self.template_name)
-    
-    def post(self, request):
-        data = request.POST
-        email = data.get('email')
-
-        # Check if the email already exists
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists. Please use a different email address.')
-            return render(request, 'registration/register.html')
-
-        # The rest of your registration code
-        # Generate OTP, send email, etc.
-
-        # Redirect to the OTP verification page
-        return redirect('verify_otp')
-        
 
 class QuizViewBase(View):
     """
@@ -632,36 +756,3 @@ class LogoutView(DjangoLogoutView):
     def dispatch(self, request, *args, **kwargs):
         request.session.flush()
         return super().dispatch(request, *args, **kwargs)
-
-
-# from django.contrib.auth.decorators import login_required, user_passes_test
-# from django.http import HttpResponseForbidden
-# from django.utils.decorators import method_decorator
-
-# # Mixin for regular users
-# class UserAccessMixin:
-#     @method_decorator(login_required)
-#     def dispatch(self, request, *args, **kwargs):
-#         return super().dispatch(request, *args, **kwargs)
-
-# # Mixin for admins
-# class AdminAccessMixin:
-#     @method_decorator(login_required)
-#     @method_decorator(user_passes_test(lambda u: u.role == 'admin'))
-#     def dispatch(self, request, *args, **kwargs):
-#         return super().dispatch(request, *args, **kwargs)
-
-# from django.views import View
-# from django.http import HttpResponse
-
-# # View for regular users
-# class UserQuestionView(UserAccessMixin, View):
-#     def get(self, request):
-#         # Display questions for regular users
-#         return HttpResponse("This is for regular users.")
-
-# # View for admins
-# class AdminQuestionView(AdminAccessMixin, View):
-#     def get(self, request):
-#         # Display questions for admins
-#         return HttpResponse("This is for admins.")

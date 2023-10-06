@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Example email template -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Confirmation</title>
+</head>
+<body>
+    <p>Hello {{ user.username }},</p>
+    <p>Click the link below to set your password:</p>
+    <p><a href="{{ confirmation_url }}">Set Password</a></p>
+    <p>If you didn't request this email, you can safely ignore it.</p>
+    <p>Best regards,</p>
+    <p>Your Website Team</p>
+</body>
+</html>
+{% endblock  %}
