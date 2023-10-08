@@ -153,6 +153,13 @@
     </script>
 </head>
 <body>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <div class="container">
         <section class="text-center">
             <div class="registration-card">
@@ -168,7 +175,11 @@
                         </p>
                     </div>
                     <div class="success-message"></div>
-                    <div class="error-message"></div> <!-- Error message container -->
+                    <div class="error-message">
+                        {% if error_message %}
+                            {{ error_message }}
+                        {% endif %}
+                    </div>                
                 </form>
             </div>
         </section>

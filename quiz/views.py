@@ -1,3 +1,5 @@
+from django.shortcuts import render, redirect
+from .models import Category, Question, Answer
 import logging
 from .models import *
 import random
@@ -34,12 +36,17 @@ from django.core.mail import EmailMultiAlternatives
 User = get_user_model()
 logger = logging.getLogger('django')
 
+
 class SendEmailView(View):
     def post(self, request):
         if request.method == 'POST':
             email = request.POST.get('email')
             print("Email received: ", email)
             print("POST CALLED^^^^^^^^^^^^^^^^^")
+             # Check if a user with this email already exists
+            if User.objects.filter(email=email).exists():
+                error_message = "Email already exists."
+                return render(request, 'registration/register.html', {'error_message': error_message})
             try:
                 # Check if a user with the provided email exists
                 user, created = User.objects.get_or_create(email=email)
@@ -50,12 +57,14 @@ class SendEmailView(View):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
 
                 # Build the confirmation URL
-                confirmation_url = settings.FRONTEND_URL + f'/set_password/{uid}/{token}/'
+                confirmation_url = settings.FRONTEND_URL + \
+                    f'/set_password/{uid}/{token}/'
                 print("^^^^^^^^^^^^", confirmation_url)
 
                 # Render the email template
                 subject = 'Confirm Your Registration'
-                email_template = loader.get_template('registration/email_link_template.html')
+                email_template = loader.get_template(
+                    'registration/email_link_template.html')
                 email_context = {
                     'user': user,
                     'confirmation_url': confirmation_url,
@@ -63,7 +72,8 @@ class SendEmailView(View):
                 email_content = email_template.render(email_context)
 
                 # Create an EmailMultiAlternatives object for HTML email
-                msg = EmailMultiAlternatives(subject, email_content, settings.EMAIL_HOST_USER, [user.email])
+                msg = EmailMultiAlternatives(
+                    subject, email_content, settings.EMAIL_HOST_USER, [user.email])
                 msg.attach_alternative(email_content, "text/html")
 
                 # Send the email
@@ -77,13 +87,14 @@ class SendEmailView(View):
                 logger.error(f"Error sending email: {e}")
                 return JsonResponse({'success': False, 'error_message': str(e)})
 
-            
+
 class EmailSentView(View):
     template_name = 'email_sent.html'  # Update with your actual template name
 
     def get(self, request):
         return render(request, self.template_name)
-    
+
+
 class SetPasswordView(View):
     def get(self, request, uidb64, token):
         try:
@@ -132,26 +143,46 @@ class SetPasswordView(View):
                     # Create the SetPasswordSerializer instance and validate data
                     form = SetPasswordSerializer(data=request.POST)
                     if form.is_valid():
-                        # Set the new password
                         new_password = form.validated_data['new_password']
-                        user.set_password(new_password)
-                        user.is_verified=True
-                        user.save()
+                        confirm_password = form.validated_data['confirm_password']
+                        # Set the new password
+                        if new_password == confirm_password:
+                            # Set the new password
+                            user.set_password(new_password)
+                            user.is_verified = True
+                            user.save()
 
-                        # Log in the user
-                        login(request, user)
+                            messages.success(request,"Password set successfully, now login!")
 
-                        # Redirect to a success page or any other desired page
-                        return redirect('login')
+                            # Redirect to a success page or any other desired page
+                            return render(request, 'login.html')  # Show a success page
 
-            # Log the result of token verification
-            if token_verified:
-                print("Token checked successfully")
+                        else:
+                            # Passwords don't match, show an error message
+                            error_message = "Passwords do not match."
+                    else:
+                        # Form is not valid, show validation errors
+                        error_message = "Passwords do not match."
+
+                else:
+                    # Token verification failed, show an error message
+                    error_message = "Token verification failed."
+
             else:
-                print("Token verification failed")
+                # User not found, show an error message
+                error_message = "User not found."
 
-            # If no user with the provided UID exists or token check fails, handle it accordingly (e.g., show an error)
-            return redirect('password_reset_invalid')
+            # Render the same page with an error message
+            return render(request, 'registration/set_password.html', {'user': user, 'error_message': error_message})
+
+            # # Log the result of token verification
+            # if token_verified:
+            #     print("Token checked successfully")
+            # else:
+            #     print("Token verification failed")
+
+            # # If no user with the provided UID exists or token check fails, handle it accordingly (e.g., show an error)
+            # return redirect('password_reset_invalid')
 
         except Exception as e:
             user = None
@@ -164,8 +195,11 @@ class SetPasswordView(View):
 
 class PasswordResetInvalid(View):
     def get(self, request):
-        return render(request, 'password_reset_invalid.html')        
+        return render(request, 'password_reset_invalid.html')
+
+
 logger = logging.getLogger(__name__)
+
 
 class RegisterAPI(APIView):
     def post(self, request):
@@ -183,7 +217,7 @@ class RegisterAPI(APIView):
 
             # Create the user object but don't save it to the database yet
             user = User(email=email)
-            
+
             serializer = UserSerializer(data=data)
             if serializer.is_valid():
                 # Generate a confirmation token
@@ -193,7 +227,8 @@ class RegisterAPI(APIView):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
 
                 # Build the confirmation URL
-                confirmation_url = settings.FRONTEND_URL + f'/set_password/{uid}/{token}/'
+                confirmation_url = settings.FRONTEND_URL + \
+                    f'/set_password/{uid}/{token}/'
 
                 # Create a subject and message for the email
                 subject = 'Confirm Your Registration'
@@ -203,7 +238,8 @@ class RegisterAPI(APIView):
                 })
 
                 # Send the email
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+                send_mail(subject, message,
+                          settings.DEFAULT_FROM_EMAIL, [user.email])
 
                 # Save the user to the database
                 user.save()
@@ -225,7 +261,7 @@ class RegisterAPI(APIView):
                 'message': 'Something went wrong.',
                 'data': str(e)
             })
-        
+
 
 class RegisterView(View):
     """
@@ -238,24 +274,36 @@ class RegisterView(View):
         Display the registration form.
         """
         return render(request, self.template_name)
-    
+
+    # def post(self, request):
+    #     data = request.POST
+    #     email = data.get('email')
+
+    #     if User.objects.filter(email=email).exists():
+    #         error_message = "Email already exists"
+    #         return render(request, 'registration/register.html', {'error_message': error_message})
+    #     else:
+    #         messages.success(request, "Registration Successfull")
+            
+    #         user = User.objects.create_user(email=email)
+
+    #         # Log in the newly created user
+    #         login(request, user)
+
+    #         # Redirect to the OTP verification page or any other desired page
+    #         return redirect('login')
     def post(self, request):
         data = request.POST
         email = data.get('email')
-        
-        if not email:
-        # Handle the case where the email is empty
-            return HttpResponse("Email must be provided.", status=400)
-        existing_user = User.objects.filter(email=email).first()
-        if existing_user:
-            return HttpResponse("Email already exists. Please use a different email address.", status=400)
-        # Create a new user without checking for email existence
-        user = User.objects.create_user(email=email)
-        
-        # Log in the newly created user
-        login(request, user)
 
-        # Redirect to the OTP verification page or any other desired page
+        # Check if a user with this email already exists
+        if User.objects.filter(email=email).exists():
+            error_message = "Email already exists."
+            return render(request, 'registration/register.html', {'error_message': error_message})
+
+        # If the email is unique, proceed with sending the email and registration
+        user = User.objects.create_user(email=email)
+        messages.success(request, "Registration successful. Check email to set the password.")
         return redirect('login')
 
 
@@ -305,10 +353,10 @@ class IndexView(View):
 
 
 class AddQuizView(View):
-    template_name = 'add_quiz.html'  # The template where you have the form
+    template_name = 'add_quiz.html'
 
     def get(self, request):
-        # Retrieve categories and answers from the database
+        # Retrieve categories (quizzes) and answers from the database
         categories = Category.objects.all()
         answers = Answer.objects.all()
         context = {
@@ -319,43 +367,71 @@ class AddQuizView(View):
 
     def post(self, request):
         # Handle the form submission
-        category_id = request.POST.get('category')
-        question_text = request.POST.get('question')
-        question_type = request.POST.get('question_type')
-        score = request.POST.get('score')
+        # Get the quiz name from the form
+        quiz_name = request.POST.get('category')
 
-        # Create a new question
-        question = Question.objects.create(
-            category_id=category_id,
-            text=question_text,
-            question_type=question_type,
-            score=score
-        )
+        # Create a new quiz (category)
+        new_quiz = Category(category_name=quiz_name)
+        new_quiz.save()
 
-        if question_type == 'MCQ':
-            # For Multiple Choice Questions
-            answer_ids = [int(request.POST.get(f'answer{i}')) for i in range(1, 6)]  # Adjust the range as needed
+        # Print the new quiz name
+        print(f"New quiz created: {new_quiz.category_name}")
 
-            for answer_id in answer_ids:
-                answer = Answer.objects.get(id=answer_id)
-                question.answers.add(answer)
+        # Retrieve and process questions, answers, and other attributes from the form
+        # Get the number of questions from the form
+        question_count = int(request.POST.get('question_count', 0))
 
-            correct_answer_ids = request.POST.getlist('correct_answer')
-            for correct_id in correct_answer_ids:
-                correct_answer = Answer.objects.get(id=correct_id)
+        for i in range(1, question_count + 1):
+            question_text = request.POST.get(f'question{i}')
+            question_type = request.POST.get(f'question_type{i}')
+            score = request.POST.get(f'score{i}')
+
+            # Create a new question and associate it with the quiz (category)
+            question = Question(
+                # Associate the question with the new_quiz (category)
+                category=new_quiz,
+                text=question_text,
+                question_type=question_type,
+                score=score
+            )
+            question.save()
+
+            # Print the saved question text
+            print(f"Question {i} saved: {question.text}")
+
+            if question_type == 'MCQ':
+                # For Multiple Choice Questions
+                answer_ids = [int(request.POST.get(
+                    f'answer{i}_{j}')) for j in range(1, 6)]
+
+                for answer_id in answer_ids:
+                    answer = Answer.objects.get(id=answer_id)
+                    question.answers.add(answer)
+
+                correct_answer_ids = request.POST.getlist(f'correct_answer{i}')
+                for correct_id in correct_answer_ids:
+                    correct_answer = Answer.objects.get(id=correct_id)
+                    question.correct_answers.add(correct_answer)
+
+                print(
+                    f"MCQ Question {i} saved with answers and correct answers")
+
+            elif question_type == 'FIB':
+                # For Fill in the Blank Questions
+                correct_answer_text = request.POST.get(f'correct_answer{i}')
+
+                # Create and set the correct answer
+                correct_answer = Answer(answer=correct_answer_text)
+                correct_answer.save()
                 question.correct_answers.add(correct_answer)
 
-        elif question_type == 'FIB':
-            # For Fill in the Blank Questions
-            correct_answer_text = request.POST.get('correct_answer')
-
-            # Create and set the correct answer
-            correct_answer = Answer.objects.create(answer=correct_answer_text)
-            question.correct_answers.add(correct_answer)
+                print(
+                    f"FIB Question {i} saved with correct answer: {correct_answer.text}")
 
         # Redirect to a success page or wherever you'd like
         return redirect('index')  # Adjust the URL name
-    
+
+
 # class ForgotView(PasswordResetView):
 #     """
 #     ForgotView: Handles password reset via web interface.
@@ -429,9 +505,10 @@ class QuizViewBase(View):
         """
         category = self.get_category()
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
-        
+
         questions = list(Question.objects.filter(category=category))
         answers = list(Answer.objects.all())
 
@@ -447,11 +524,13 @@ class QuizViewBase(View):
                 '%Y-%m-%d %H:%M:%S')
             request.session['quiz_started'] = True
 
-        completed_quizzes = User.objects.get(username=request.user.username).completed_quizzes
+        completed_quizzes = User.objects.get(
+            email=request.user.email).completed_quizzes
 
         total_categories = Category.objects.count()
         if total_categories > 0:
-            progress_percentage = (completed_quizzes / total_categories) * 100.0
+            progress_percentage = (completed_quizzes /
+                                   total_categories) * 100.0
         else:
             progress_percentage = 0.0
 
@@ -472,9 +551,10 @@ class QuizViewBase(View):
         """
         category = self.get_category()
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
-        
+
         questions = list(Question.objects.filter(category=category))
         answers = list(Answer.objects.all())
 
@@ -543,15 +623,18 @@ class QuizViewBase(View):
         else:
             percentage = 0
 
-        completed_quizzes = User.objects.get(username=request.user.username).completed_quizzes
+        completed_quizzes = User.objects.get(
+            email=request.user.email).completed_quizzes
         total_quizzes = total_categories
         if completed_quizzes < total_quizzes:
-            User.objects.filter(username=request.user.username).update(completed_quizzes=F('completed_quizzes') + 1)
-        
+            User.objects.filter(email=request.user.email).update(
+                completed_quizzes=F('completed_quizzes') + 1)
+
         request.session[f'{self.quiz_type}_completed'] = True
 
         if total_categories > 0:
-            progress_percentage = (completed_quizzes / total_categories) * 100.0
+            progress_percentage = (completed_quizzes /
+                                   total_categories) * 100.0
         else:
             progress_percentage = 0.0
 
@@ -562,6 +645,7 @@ class QuizViewBase(View):
         request.session[f'{self.quiz_type}_total_fib_questions'] = total_fib_questions
 
         return HttpResponseRedirect(reverse(f'{self.quiz_type}_result'))
+
 
 class PythonQuiz(QuizViewBase):
     """
@@ -575,14 +659,15 @@ class PythonQuiz(QuizViewBase):
     @property
     def quiz_type(self):
         return 'python'
-    
+
     def get(self, request):
         """
         Display the Python quiz page.
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().get(request)
@@ -593,10 +678,12 @@ class PythonQuiz(QuizViewBase):
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().post(request)
+
 
 class PythonResultView(View):
     """
@@ -611,7 +698,8 @@ class PythonResultView(View):
         score = request.session.get('python_score', '0/0')
         user_answers = request.session.get('python_user_answers', [])
         total_questions_attempted = len(user_answers)
-        total_fib_questions = request.session.get('python_total_fib_questions', 0)
+        total_fib_questions = request.session.get(
+            'python_total_fib_questions', 0)
         percentage = request.session.get('python_percentage', 0)
         progress_percentage = request.session.get(
             'quiz_progress_percentage', 0)
@@ -625,6 +713,7 @@ class PythonResultView(View):
             'progress_percentage': progress_percentage,
         })
 
+
 class JavaScriptQuiz(QuizViewBase):
     """
     JavaScriptQuizView: Handles the JavaScript quiz page.
@@ -637,14 +726,15 @@ class JavaScriptQuiz(QuizViewBase):
     @property
     def quiz_type(self):
         return 'javascript'
-    
+
     def get(self, request):
         """
         Display the Python quiz page.
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().get(request)
@@ -655,10 +745,12 @@ class JavaScriptQuiz(QuizViewBase):
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().post(request)
+
 
 class JavaScriptResultView(View):
     """
@@ -673,7 +765,8 @@ class JavaScriptResultView(View):
         score = request.session.get('javascript_score', '0/0')
         user_answers = request.session.get('javascript_user_answers', [])
         total_questions_attempted = len(user_answers)
-        total_fib_questions = request.session.get('javascript_total_fib_questions', 0)
+        total_fib_questions = request.session.get(
+            'javascript_total_fib_questions', 0)
         percentage = request.session.get('javascript_percentage', 0)
         progress_percentage = request.session.get(
             'quiz_progress_percentage', 0)
@@ -687,6 +780,7 @@ class JavaScriptResultView(View):
             'progress_percentage': progress_percentage,
         })
 
+
 class DjangoQuizView(QuizViewBase):
     """
     DjangoQuizView: Handles the Django quiz page.
@@ -699,14 +793,15 @@ class DjangoQuizView(QuizViewBase):
     @property
     def quiz_type(self):
         return 'django'
-    
+
     def get(self, request):
         """
         Display the Python quiz page.
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().get(request)
@@ -717,10 +812,12 @@ class DjangoQuizView(QuizViewBase):
         """
         # Check if the user has already completed the Python quiz
         if request.session.get(f'{self.quiz_type}_completed'):
-            messages.warning(request, f"You've already completed the {self.quiz_type} quiz.")
+            messages.warning(
+                request, f"You've already completed the {self.quiz_type} quiz.")
             return redirect(f'{self.quiz_type}_result')
 
         return super().post(request)
+
 
 class DjangoResultView(View):
     """
@@ -735,7 +832,8 @@ class DjangoResultView(View):
         score = request.session.get('django_score', '0/0')
         user_answers = request.session.get('django_user_answers', [])
         total_questions_attempted = len(user_answers)
-        total_fib_questions = request.session.get('django_total_fib_questions', 0)
+        total_fib_questions = request.session.get(
+            'django_total_fib_questions', 0)
         percentage = request.session.get('django_percentage', 0)
         progress_percentage = request.session.get(
             'quiz_progress_percentage', 0)
@@ -749,11 +847,13 @@ class DjangoResultView(View):
             'progress_percentage': progress_percentage,
         })
 
+
 class LogoutView(DjangoLogoutView):
     """
     LogoutView: Handles user logout.
     """
-    next_page='/'
+    next_page = '/'
+
     def dispatch(self, request, *args, **kwargs):
         request.session.flush()
         return super().dispatch(request, *args, **kwargs)

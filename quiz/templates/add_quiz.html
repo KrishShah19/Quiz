@@ -133,6 +133,24 @@
         transform: scale(1.05); /* Add a slight scale effect on hover */
         box-shadow: 0 0 10px silver; /* Add a subtle box shadow on hover */
     }
+    .home{
+        background-color: transparent;
+        outline:white;
+        color: #ffffff;
+        border: 1px solid white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        font-family: 'Montserrat';
+        font-size:15px;
+    }
+    .home:hover {
+        transform: scale(1.05); /* Add a slight scale effect on hover */
+        box-shadow: 0 0 10px silver; /* Add a subtle box shadow on hover */
+    }
     .reset-form{
         background-color: transparent;
         outline:white;
@@ -218,33 +236,31 @@
         margin-top: 10px;
     }   
 </style>
-{% load custom_template_tags %}
-
-<!-- Show admin-specific content only to admins -->
-{% if request.user|has_admin_role %}
-    <p>This content is visible only to admins.</p>
 <div class="container">
+<input type="button" name="button" value="Home" class="home"/>
     <h2>Add Quiz</h2>
-
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" action="{% url 'add_quiz' %}">
         {% csrf_token %}
+        <label for="quiz_photo">Quiz Photo (1280x720):</label><br><br>
+        <input type="file" name="quiz_photo" id="quiz_photo" accept="image/*" required><br><br>
+
         <label for="category">Category:</label><br><br>
-        <input type="text" name="category" id="category"><br><br>
+        <input type="text" name="category" id="category" required><br><br>
 
         <div id="questions">
             <div class="question">
                 <span class="question-number">Question 1:</span><br><br>
                 <label for="question"></label>
-                <input type="text" name="question" class="question-field"><span class="remove-question" onclick="removeQuestion(this)">✖</span><br>
+                <input type="text" name="question" class="question-field"><span class="remove-question question-number-1" onclick="removeQuestion(this)">✖</span><br>
 
                 <label for="question_type">Question Type:</label><br><br>
-                <select name="question_type" class="question-type">
+                <select name="question_type" class="question-type" required>
                     <option value="FIB" selected>Fill in the Blank</option>
                     <option value="MCQ">Multiple Choice</option>
                 </select><br><br>
 
                 <label for="score">Score:</label><br><br>
-                <input type="number" name="score" class="score"><br><br>
+                <input type="number" name="score" class="score" required><br><br>
 
                 <div class="answers_mcq" style="display: none;">
                     <label for="answer">Answers:</label><br>
@@ -258,22 +274,23 @@
 
                 <div class="answers_fib">
                     <label for="correct_answer">Correct Answer:</label><br><br>
-                    <input type="text" name="correct_answer" class="correct-answer"><br>
+                    <input type="text" name="correct_answer" class="correct-answer" required><br>
                 </div>
 
                 <div class="correct_answer_mcq" style="display: none;">
                     <label>Mark Correct Answer:</label><br>
-                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 1<br>
-                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 2<br>
-                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 3<br>
-                    <input type="radio" name="correct_answer" class="correct-answer-radio"> Answer 4<br>
+                    <input type="radio" name="correct_answer{{ questionCount }}" class="correct-answer-radio"> Answer 1<br>
+                    <input type="radio" name="correct_answer{{ questionCount }}" class="correct-answer-radio"> Answer 2<br>
+                    <input type="radio" name="correct_answer{{ questionCount }}" class="correct-answer-radio"> Answer 3<br>
+                    <input type="radio" name="correct_answer{{ questionCount }}" class="correct-answer-radio"> Answer 4<br>
                 </div>
             </div>
         </div>
 
         <button type="button" class="add_question" id="add_question">Add Question</button><br>
 
-        <input type="button" value="+ Add Quiz" class="add_quiz"><button type="button" class="reset-form" id="reset-form">Reset Form</button><br>
+        <input type="submit" value="+ Add Quiz" class="add_quiz">
+        <button type="button" class="reset-form" id="reset-form">Reset Form</button><br>
 
     </form>
 </div>
@@ -286,7 +303,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <script>
     // JavaScript to show/hide the correct answer and answer fields based on question type selection
@@ -299,6 +315,15 @@
         questionsDiv.removeChild(questionToRemove);
         questionCount--;
         updateQuestionNumbers();
+
+        if (!questionToRemove.classList.contains('question-number-1')) {
+            questionsDiv.removeChild(questionToRemove);
+            questionCount--;
+            updateQuestionNumbers();
+        } else {
+            alert("Question 1 cannot be removed.");
+        }
+
     }
     // Function to update question numbers
     function updateQuestionNumbers() {
@@ -366,6 +391,9 @@
             });
             correctAnswerRadioInputs.forEach(input => {
                 input.setAttribute('name', `correct_answer_${questionCount}`);
+            });
+            correctAnswerRadioInputs.forEach(input => {
+                input.setAttribute('name', `correct_answer${questionCount}`);
             });
         } else if (questionTypeSelect.value === 'FIB') {
             answersMCQ.style.display = 'none';
@@ -456,6 +484,8 @@
     // Function to clear the form data when "Add Quiz" is clicked
     const addQuizButton = document.querySelector('.add_quiz');
     addQuizButton.addEventListener('click', function () {
+        console.log("Add Quiz button clicked."); // Add this line
+
         const formFields = document.querySelectorAll('input, select');
         formFields.forEach(field => {
             field.value = '';
@@ -464,5 +494,24 @@
         // Clear the saved form data in localStorage
         localStorage.removeItem('formData');
     });
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+    
+        form.addEventListener('submit', function(event) {
+            const scoreInputs = document.querySelectorAll('.score');
+    
+            for (let i = 0; i < scoreInputs.length; i++) {
+                const scoreInput = scoreInputs[i];
+                const score = parseInt(scoreInput.value);
+    
+                if (isNaN(score) || score < 0 || score > 5) {
+                    alert('Score must be a number between 0 and 5.');
+                    event.preventDefault(); // Prevent form submission
+                    return;
+                }
+            }
+        });
+    });
+    
 </script>
 {% endblock %}

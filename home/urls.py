@@ -51,5 +51,7 @@ urlpatterns = [
     path('password_reset_invalid/', PasswordResetInvalid.as_view(), name='password_reset_invalid'),
     path('send_email/', SendEmailView.as_view(), name='send_email'),
     path('add_quiz/', AddQuizView.as_view(), name='add_quiz'),
+    # path('quiz/<str:category>/', QuizView.as_view(), name='quiz_view'),
+
 
 ]

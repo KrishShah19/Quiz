@@ -331,7 +331,7 @@
   <div class="container">
     <div class="quiz-container mb-4">
       <div class="header">
-        <h4 class="fw-bold mb-2 text-white">Welcome {{ request.user }}!</h4>
+        <h4 class="fw-bold mb-2 text-white">Welcome to Quizzy!</h4>
         <div class="progress">
           <div class="progress-bar" role="progressbar" style="width: {{ request.session.quiz_progress_percentage }}%;" aria-valuenow="{{ request.session.quiz_progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
             <span id="roundedPercentage" style="font-size:15px;font-weight:bold; color:black;">{{ request.session.quiz_progress_percentage|floatformat:0 }}%</span>

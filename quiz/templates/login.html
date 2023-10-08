@@ -99,9 +99,25 @@
             color: white;
             margin-right: 10px;
         }
+        .alert.auto-dismiss {
+            display: inline-block; /* Display the message as an inline block */
+            padding: 5px 10px; /* Add some padding to provide space around the text */
+            font-size: 14px; /* Set your desired font size */
+            animation: fadeOut 4s ease-in-out forwards;
+            /* Optionally, add more styles such as background color, border, etc. */
+        }
     </style>
 </head>
 <body>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} {% if message.tags == 'success' %}auto-dismiss{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="container">
         <h2 class="fw-bold mb-4 text-uppercase">Login</h2>
         <p class="text-white-50 mb-4">Please enter your email and password!</p>
@@ -119,6 +135,17 @@
         </form>
         <p class="mb-0 mt-3 text-white">Don't have an account? <a href="{% url 'register' %}" class="text-white-50 fw-bold">Sign Up</a></p>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Automatically close the success message after 4 seconds
+            var autoDismissMessages = document.querySelectorAll('.auto-dismiss');
+            autoDismissMessages.forEach(function (message) {
+                setTimeout(function () {
+                    message.style.display = 'none';
+                }, 3000); // 4 seconds
+            });
+        });
+    </script>        
 </body>
 </html>
 {% endblock %}
